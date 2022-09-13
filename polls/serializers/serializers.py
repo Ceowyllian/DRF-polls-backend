@@ -19,18 +19,14 @@ class QuestionListSerializer(serializers.Serializer):
         return instance
 
 
-class ChoiceListSerializer(serializers.Serializer):
+class ChoiceSerializer(serializers.Serializer):
     choice_uuid = serializers.UUIDField(required=False)
     choice_text = serializers.CharField(max_length=200, required=True)
     votes = serializers.IntegerField(required=False)
+    question_id = serializers.IntegerField(write_only=True)
 
     def create(self, validated_data):
-        question_slug = validated_data['question_slug']
-        question = Question.objects.get(question_slug=question_slug)
-        return question.choice_set.create(
-            question=question,
-            choice_text=validated_data['choice_text']
-        )
+        return Choice.objects.create(**validated_data)
 
     def update(self, instance: Choice, validated_data):
         for key, value in validated_data.items():
@@ -40,8 +36,4 @@ class ChoiceListSerializer(serializers.Serializer):
 
 
 class QuestionSerializer(QuestionListSerializer):
-    choices = ChoiceListSerializer(many=True, read_only=True, required=False)
-
-
-class ChoiceSerializer(ChoiceListSerializer):
-    question = QuestionListSerializer()
+    choices = ChoiceSerializer(many=True, read_only=True, required=False)
