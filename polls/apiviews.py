@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from .models import Question, Choice
 from .serializers import (
     QuestionListSerializer,
-    ChoiceListSerializer,
     QuestionSerializer,
     ChoiceSerializer,
 )
@@ -16,7 +15,6 @@ from .serializers import (
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def questions(request):
-
     if request.method == 'GET':
         question_list = Question.objects.all()
         serializer = QuestionListSerializer(question_list, many=True)
@@ -57,18 +55,17 @@ def choices(request, question_slug: str):
     question = get_object_or_404(Question, question_slug=question_slug)
 
     if request.method == 'GET':
-        serializer = ChoiceListSerializer(question.choices(), many=True)
+        serializer = ChoiceSerializer(question.choices(), many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
         serializer = ChoiceSerializer(data={
-            'question_slug': question_slug,
+            'question_id': question.id,
             **request.data,
         })
-
         if serializer.is_valid():
             choice = serializer.save()
-            return Response(ChoiceListSerializer(choice).data, status=status.HTTP_201_CREATED)
+            return Response(ChoiceSerializer(choice).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
