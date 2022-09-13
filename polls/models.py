@@ -26,5 +26,11 @@ class Choice(models.Model):
     votes = models.IntegerField(default=0)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('choice_text', 'question')
+
     def __str__(self):
         return self.choice_text
+
+    def question_slug(self):
+        return self.question.question_slug
