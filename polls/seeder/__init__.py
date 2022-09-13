@@ -1,1 +1,1 @@
-from seeder import run
+from .seeder import run

@@ -1,9 +1,8 @@
 from django.test import TestCase
 
-import seeder
-
+from .seeder import run
 
 class TestQuestionModel(TestCase):
 
     def setUp(self):
-        seeder.run()
+        run()
