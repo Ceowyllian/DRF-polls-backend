@@ -21,10 +21,10 @@ def run(seed=randint(0, 99999)):
     fake = Faker()
     fake.add_provider(date_time)
     seeder = Seed.seeder()
-    seeder.add_entity(Question, 3, {
+    seeder.add_entity(Question, 7, {
         'pub_date': fake.date_time_between('-4d', 'now'),
     })
-    seeder.add_entity(Choice, 10, {
+    seeder.add_entity(Choice, 20, {
         'choice_uuid': lambda x: uuid4(),
         'votes': lambda x: randint(0, 50),
     })
