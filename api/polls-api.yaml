@@ -6,15 +6,17 @@ info:
 servers:
   - url: 'http://localhost:8000/polls/'
 tags:
-  - name: question
+  - name: Question
     description: Questions in the polls service
+  - name: Choice
+    description: Answer options for the question
 
 paths:
 
   /questions/:
     get:
       tags:
-        - question
+        - Question
       summary: Get list of all questions.
       description: List of questions.
       responses:
@@ -28,7 +30,7 @@ paths:
                   $ref: '#/components/schemas/Question'
     post:
       tags:
-        - question
+        - Question
       summary: Create new question
       description: Create new question with specified title, text and choices
       requestBody:
@@ -36,21 +38,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Question'
+              $ref: '#/components/schemas/QuestionWithChoices'
       responses:
         201:
           description: New question was created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Question'
+                $ref: '#/components/schemas/QuestionWithChoices'
         400:
           description: Error.
 
   /questions/{question_slug}/:
     get:
       tags:
-        - question
+        - Question
       parameters:
         - name: question_slug
           in: path
@@ -68,7 +70,7 @@ paths:
                 $ref: '#/components/schemas/Question'
     patch:
       tags:
-        - question
+        - Question
       parameters:
         - name: question_slug
           in: path
@@ -77,6 +79,12 @@ paths:
           schema:
             type: string
             format: slug
+      requestBody:
+        description: Question
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
       responses:
         200:
           description: Updated successfully
@@ -84,6 +92,112 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Question'
+    delete:
+      tags:
+        - Question
+      parameters:
+        - name: question_slug
+          in: path
+          description: slug of question to be deleted
+          required: true
+      responses:
+        204:
+          description: Deleted successfully
+
+  /questions/{question_slug}/choices/:
+    get:
+      tags:
+        - Choice
+      parameters:
+        - name: question_slug
+          in: path
+          description: slug of the question
+          required: true
+          schema:
+            type: string
+            format: slug
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Choice'
+    post:
+      tags:
+        - Choice
+      parameters:
+        - name: question_slug
+          description: slug of the question
+          in: path
+          required: true
+          schema:
+            type: string
+            format: slug
+      requestBody:
+        description: Choice
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Choice'
+      responses:
+        201:
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Choice'
+
+  /questions/{question_slug}/choices/{choice_uuid}/:
+    get:
+      tags:
+        - Choice
+      parameters:
+        - name: question_slug
+          in: path
+          description: slug of the question
+          required: true
+          schema:
+            type: string
+            format: slug
+        - name: choice_uuid
+          in: path
+          description: uuid of the choice
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Choice'
+    delete:
+      tags:
+        - Choice
+      parameters:
+        - name: question_slug
+          in: path
+          required: true
+          schema:
+            type: string
+            format: slug
+        - name: choice_uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: deleted successfully
+
+
 components:
   schemas:
 
@@ -103,11 +217,17 @@ components:
         question_slug:
           type: string
           readOnly: true
-        choices:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/Choice'
+
+    QuestionWithChoices:
+      allOf:
+        - $ref: '#/components/schemas/Question'
+        - type: object
+          properties:
+            choices:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Choice'
 
     Choice:
       type: object
