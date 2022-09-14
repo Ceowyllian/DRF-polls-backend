@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: DRF polls API
+  description: Sample django polls app.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8000/polls/'
+tags:
+  - name: question
+    description: Questions in the polls service
+
+paths:
+
+  /questions/:
+    get:
+      tags:
+        - question
+      summary: Get list of all questions.
+      description: List of questions.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+    post:
+      tags:
+        - question
+      summary: Create new question
+      description: Create new question with specified title, text and choices
+      requestBody:
+        description: Question
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        201:
+          description: New question was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        400:
+          description: Error.
+
+  /questions/{question_slug}/:
+    get:
+      tags:
+        - question
+      parameters:
+        - name: question_slug
+          in: path
+          description: slug of question to return
+          required: true
+          schema:
+            type: string
+            format: slug
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+    patch:
+      tags:
+        - question
+      parameters:
+        - name: question_slug
+          in: path
+          description: slug of question to be updated
+          required: true
+          schema:
+            type: string
+            format: slug
+      responses:
+        200:
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+components:
+  schemas:
+
+    Question:
+      type: object
+      required:
+        - question_title
+        - question_text
+        - choices
+      properties:
+        question_title:
+          type: string
+          maxLength: 40
+        question_text:
+          type: string
+          maxLength: 200
+        question_slug:
+          type: string
+          readOnly: true
+        choices:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Choice'
+
+    Choice:
+      type: object
+      properties:
+        choice_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        choice_text:
+          type: string
+          maxLength: 200
+        votes:
+          type: integer
+          format: int64
