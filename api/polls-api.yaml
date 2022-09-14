@@ -17,7 +17,7 @@ paths:
     get:
       tags:
         - Question
-      summary: Get list of all questions.
+      summary: Get list of all questions
       description: List of questions.
       responses:
         200:
@@ -25,9 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Question'
+                $ref: '#/components/schemas/ArrayOfQuestions'
     post:
       tags:
         - Question
@@ -53,14 +51,10 @@ paths:
     get:
       tags:
         - Question
+      summary: Get question by slug
+      description: Question with specified slug.
       parameters:
-        - name: question_slug
-          in: path
-          description: slug of question to return
-          required: true
-          schema:
-            type: string
-            format: slug
+        - $ref: '#/components/parameters/question_slug'
       responses:
         200:
           description: Success
@@ -71,14 +65,10 @@ paths:
     patch:
       tags:
         - Question
+      summary: Edit question
+      description: Edit question with specified slug
       parameters:
-        - name: question_slug
-          in: path
-          description: slug of question to be updated
-          required: true
-          schema:
-            type: string
-            format: slug
+        - $ref: '#/components/parameters/question_slug'
       requestBody:
         description: Question
         content:
@@ -95,11 +85,10 @@ paths:
     delete:
       tags:
         - Question
+      summary: Delete question
+      description: Delete question with specified slug.
       parameters:
-        - name: question_slug
-          in: path
-          description: slug of question to be deleted
-          required: true
+        - $ref: '#/components/parameters/question_slug'
       responses:
         204:
           description: Deleted successfully
@@ -109,13 +98,7 @@ paths:
       tags:
         - Choice
       parameters:
-        - name: question_slug
-          in: path
-          description: slug of the question
-          required: true
-          schema:
-            type: string
-            format: slug
+        - $ref: '#/components/parameters/question_slug'
       responses:
         200:
           description: Success
@@ -129,13 +112,7 @@ paths:
       tags:
         - Choice
       parameters:
-        - name: question_slug
-          description: slug of the question
-          in: path
-          required: true
-          schema:
-            type: string
-            format: slug
+        - $ref: '#/components/parameters/question_slug'
       requestBody:
         description: Choice
         required: true
@@ -151,25 +128,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Choice'
 
-  /questions/{question_slug}/choices/{choice_uuid}/:
+  /choices/{choice_uuid}/:
     get:
       tags:
         - Choice
       parameters:
-        - name: question_slug
-          in: path
-          description: slug of the question
-          required: true
-          schema:
-            type: string
-            format: slug
-        - name: choice_uuid
-          in: path
-          description: uuid of the choice
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/question_slug'
+        - $ref: '#/components/parameters/choice_uuid'
       responses:
         200:
           description: Success
@@ -181,26 +146,29 @@ paths:
       tags:
         - Choice
       parameters:
-        - name: question_slug
-          in: path
-          required: true
-          schema:
-            type: string
-            format: slug
-        - name: choice_uuid
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/question_slug'
+        - $ref: '#/components/parameters/choice_uuid'
       responses:
         204:
           description: deleted successfully
 
 
 components:
-  schemas:
+  parameters:
+    question_slug:
+      name: question_slug
+      in: path
+      schema:
+        type: string
+        format: slug
+    choice_uuid:
+      name: choice_uuid
+      in: path
+      schema:
+        type: string
+        format: uuid
 
+  schemas:
     Question:
       type: object
       required:
@@ -217,6 +185,11 @@ components:
         question_slug:
           type: string
           readOnly: true
+
+    ArrayOfQuestions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Question'
 
     QuestionWithChoices:
       allOf:
