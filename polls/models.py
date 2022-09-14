@@ -22,7 +22,7 @@ class Question(models.Model):
 
 class Choice(models.Model):
     choice_uuid = models.UUIDField(unique=True, default=uuid4, editable=False)
-    choice_text = models.CharField(max_length=200)
+    choice_text = models.CharField(max_length=60)
     votes = models.IntegerField(default=0)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
