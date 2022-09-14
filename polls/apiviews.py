@@ -70,7 +70,7 @@ def choices(request, question_slug: str):
 
 
 @csrf_exempt
-@api_view(['GET', 'PATCH', 'DELETE'])
+@api_view(['GET', 'DELETE'])
 def choice_detail(request, question_slug: str, choice_uuid: str):
     choice = get_object_or_404(Choice,
                                question__question_slug=question_slug,
@@ -79,13 +79,6 @@ def choice_detail(request, question_slug: str, choice_uuid: str):
     if request.method == 'GET':
         serializer = ChoiceSerializer(choice)
         return Response(serializer.data)
-
-    elif request.method == 'PATCH':
-        serializer = ChoiceSerializer(choice, data=request.data, partial=True)
-        if serializer.is_valid():
-            choice = serializer.save()
-            return Response(ChoiceSerializer(choice).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         choice.delete()
