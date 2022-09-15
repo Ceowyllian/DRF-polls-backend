@@ -43,4 +43,6 @@ jobs:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
         run: |
+          python manage.py makemigrations
+          python manage.py migrate
           python manage.py test
