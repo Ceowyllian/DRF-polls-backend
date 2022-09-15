@@ -5,7 +5,9 @@ from uuid import uuid4
 class Question(models.Model):
     question_title = models.CharField(max_length=40)
     question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField('date published',
+                                    auto_now=True,
+                                    editable=False)
     question_slug = models.SlugField(max_length=60,
                                      unique=True,
                                      db_index=True,
