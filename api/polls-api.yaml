@@ -10,6 +10,8 @@ tags:
     description: Questions in the polls service
   - name: Choice
     description: Answer options for the question
+  - name: Vote
+    description: Votes for answer options
 
 paths:
 
