@@ -80,10 +80,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'OPTIONS': {
-            'service': 'django_polls_db',
-        }
+        'ENGINE': os.environ.get('DJANGO_DBENGINE'),
+        'NAME': os.environ.get('DJANGO_DBNAME'),
+        'HOST': os.environ.get('DJANGO_DBHOST'),
+        'PORT': os.environ.get('DJANGO_DBPORT'),
+        'USER': os.environ.get('DJANGO_DBUSER'),
+        'PASSWORD': os.environ.get('DJANGO_DBPASSWORD'),
     }
 }
 
