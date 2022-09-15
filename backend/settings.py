@@ -77,17 +77,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('DJANGO_DBENGINE'),
-        'NAME': os.environ.get('DJANGO_DBNAME'),
-        'HOST': os.environ.get('DJANGO_DBHOST'),
-        'PORT': os.environ.get('DJANGO_DBPORT'),
-        'USER': os.environ.get('DJANGO_DBUSER'),
-        'PASSWORD': os.environ.get('DJANGO_DBPASSWORD'),
+        'ENGINE': os.environ.get('DBENGINE'),
+        'NAME': os.environ.get('DBNAME'),
+        'USER': os.environ.get('DBUSER'),
+        'PASSWORD': os.environ.get('DBPASSWORD'),
+        'HOST': os.environ.get('DBHOST'),
+        'PORT': os.environ.get('DBPORT'),
     }
 }
+
 
 
 # Password validation
