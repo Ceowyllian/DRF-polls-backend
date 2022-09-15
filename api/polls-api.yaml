@@ -21,11 +21,7 @@ paths:
       description: List of questions.
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ArrayOfQuestions'
+          $ref: '#/components/responses/ArrayOfQuestions'
     post:
       tags:
         - Question
@@ -48,13 +44,13 @@ paths:
           description: Error.
 
   /questions/{question_slug}/:
+    parameters:
+      - $ref: '#/components/parameters/question_slug'
     get:
       tags:
         - Question
       summary: Get question by slug
       description: Question with specified slug.
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
       responses:
         200:
           description: Success
@@ -67,8 +63,6 @@ paths:
         - Question
       summary: Edit question
       description: Edit question with specified slug
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
       requestBody:
         description: Question
         content:
@@ -87,32 +81,22 @@ paths:
         - Question
       summary: Delete question
       description: Delete question with specified slug.
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
       responses:
         204:
           description: Deleted successfully
 
   /questions/{question_slug}/choices/:
+    parameters:
+      - $ref: '#/components/parameters/question_slug'
     get:
       tags:
         - Choice
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Choice'
+          $ref: '#/components/responses/ArrayOfChoices'
     post:
       tags:
         - Choice
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
       requestBody:
         description: Choice
         required: true
@@ -129,12 +113,11 @@ paths:
                 $ref: '#/components/schemas/Choice'
 
   /choices/{choice_uuid}/:
+    parameters:
+      - $ref: '#/components/parameters/choice_uuid'
     get:
       tags:
         - Choice
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
-        - $ref: '#/components/parameters/choice_uuid'
       responses:
         200:
           description: Success
@@ -145,30 +128,13 @@ paths:
     delete:
       tags:
         - Choice
-      parameters:
-        - $ref: '#/components/parameters/question_slug'
-        - $ref: '#/components/parameters/choice_uuid'
       responses:
         204:
           description: deleted successfully
 
-
 components:
-  parameters:
-    question_slug:
-      name: question_slug
-      in: path
-      schema:
-        type: string
-        format: slug
-    choice_uuid:
-      name: choice_uuid
-      in: path
-      schema:
-        type: string
-        format: uuid
-
   schemas:
+
     Question:
       type: object
       required:
@@ -185,11 +151,6 @@ components:
         question_slug:
           type: string
           readOnly: true
-
-    ArrayOfQuestions:
-      type: array
-      items:
-        $ref: '#/components/schemas/Question'
 
     QuestionWithChoices:
       allOf:
@@ -215,3 +176,40 @@ components:
         votes:
           type: integer
           format: int64
+
+  parameters:
+
+    question_slug:
+      name: question_slug
+      in: path
+      required: true
+      schema:
+        type: string
+        format: slug
+    choice_uuid:
+      name: choice_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+
+    ArrayOfQuestions:
+      description: array of questions (without choices)
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Question'
+
+    ArrayOfChoices:
+      description: array of choices (for the specified question)
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Choice'
