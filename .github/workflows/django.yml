@@ -40,6 +40,12 @@ jobs:
 
       - name: Run Tests
         env:
+          DB_ENGINE: django.db.backends.postgresql_psycopg2
+          DB_HOST: localhost
+          DB_NAME: postgres
+          DB_PASSWORD: postgres
+          DB_PORT: 5432
+          DB_USER: postgres
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
         run: |
