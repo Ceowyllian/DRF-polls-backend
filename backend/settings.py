@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,11 +81,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django_polls_db',
-        'USER': 'django_polls_user',
-        'PASSWORD': 'p31415926',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'OPTIONS': {
+            'service': 'django_polls_db',
+        }
     }
 }
 
