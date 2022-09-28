@@ -1,69 +1,52 @@
-import warnings
+import json
 
 from django.contrib.auth import get_user_model
+from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, APIRequestFactory
+from rest_framework.reverse import reverse
+from rest_framework.test import (
+    APITestCase,
+)
 
-from polls import apiviews
-from . import seeder
-from .models import Question
+from polls import seeder
 
 
-class TestQuestionList(APITestCase):
+class TestQuestions(APITestCase):
 
-    @staticmethod
-    def setup_user():
-        User = get_user_model()
-        return User.objects.create_user(
+    @classmethod
+    def setUpTestData(cls):
+        seeder.run(supress_warnings=True)
+        test_user = get_user_model().objects.create_user(
             'test',
             'test@example.com',
             password='test'
         )
+        test_token = Token.objects.create(user=test_user)
+        cls.test_user = test_user
+        cls.test_token = test_token
 
     def setUp(self):
-        seeder.run(supress_warnings=True)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.test_token.key}')
 
-        self.factory = APIRequestFactory()
-        self.view = apiviews.QuestionViewSet.as_view({
-            'get': 'list',
-            'post': 'create'
-        })
-        self.uri = '/questions/'
-
-        self.user = self.setup_user()
-        token = Token.objects.create(user=self.user)
-        token.save()
-        self.AUTH = f'Token {token.key}'
-
-    def test_get(self):
-        request = self.factory.get(
-            self.uri,
-            HTTP_AUTHORIZATION=self.AUTH
-        )
-        request.user = self.user
-        response = self.view(request)
+    def test_questions_list(self):
+        self.client.logout()
+        response = self.client.get(reverse('questions-list'))
         self.assertEqual(
-            response.status_code, 200,
+            response.status_code, status.HTTP_200_OK,
             'Expected Response Code 200, received {0} instead.'
-            .format(response.status_code)
-        )
+            .format(response.status_code))
 
-    def test_post(self):
-        request = self.factory.post(
-            self.uri,
-            HTTP_AUTHORIZATION=self.AUTH,
-            data={
-                'question_title': 'test_question',
-                'question_text': 'test_text',
-                'choices': []
-            }
-        )
-        response = self.view(request)
+    def test_create_question(self):
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+            'choices': []
+        }
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
         self.assertEqual(
-            response.status_code, 201,
+            response.status_code, status.HTTP_201_CREATED,
             'Expected Response Code 201, received {0} instead.'
-            .format(response.status_code)
-        )
-
-
-
+            .format(response.status_code))
