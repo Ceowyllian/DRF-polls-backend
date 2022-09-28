@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework import generics, status
+from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
@@ -9,7 +10,6 @@ from rest_framework.views import APIView
 from .models import Question, Choice
 from .serializers import (
     QuestionSerializer,
-    QuestionWithChoicesSerializer,
     ChoiceSerializer,
     VoteSerializer,
     UserSerializer,
@@ -19,6 +19,11 @@ from .serializers import (
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
         user = self.request.user
