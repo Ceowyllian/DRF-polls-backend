@@ -1,39 +1,58 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
-from polls.models import Choice, Question
-
-
-class QuestionListSerializer(serializers.Serializer):
-    question_title = serializers.CharField(max_length=40, required=True)
-    question_text = serializers.CharField(max_length=200, required=True)
-    pub_date = serializers.DateTimeField(read_only=True)
-    question_slug = serializers.SlugField(read_only=True)
-
-    def create(self, validated_data):
-        return Question.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        for key, value in validated_data.items():
-            setattr(instance, key, value)
-        instance.save()
-        return instance
+from polls.models import (
+    Question,
+    Choice,
+    Vote,
+)
 
 
-class ChoiceSerializer(serializers.Serializer):
-    choice_uuid = serializers.UUIDField(read_only=True)
-    choice_text = serializers.CharField(max_length=200, required=True)
-    votes = serializers.IntegerField(required=False)
-    question_id = serializers.IntegerField(write_only=True, required=True)
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = '__all__'
 
     def create(self, validated_data):
-        return Choice.objects.create(**validated_data)
-
-    def update(self, instance: Choice, validated_data):
-        for key, value in validated_data.items():
-            setattr(instance, key, value)
-        instance.save()
-        return instance
+        return Vote.objects.create(
+            voted_by=validated_data['voted_by'],
+            choice=validated_data['choice'],
+            question=validated_data['question']
+        )
 
 
-class QuestionSerializer(QuestionListSerializer):
-    choices = ChoiceSerializer(many=True, read_only=True, required=False)
+class ChoiceSerializer(serializers.ModelSerializer):
+    votes = VoteSerializer(many=True, required=False)
+
+    class Meta:
+        model = Choice
+        fields = '__all__'
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = '__all__'
+        read_only_fields = ['created_by']
+
+
+class QuestionWithChoicesSerializer(QuestionSerializer):
+    choices = ChoiceSerializer(many=True, required=False)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        Token.objects.create(user=user)
+        return user
