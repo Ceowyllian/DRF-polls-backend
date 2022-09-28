@@ -1,3 +1,5 @@
+from django.db import DatabaseError
+import logging
 if __name__ == '__main__':
     import os
     import django
@@ -6,31 +8,77 @@ if __name__ == '__main__':
     django.setup()
 
 import warnings
-from random import randint
-
+from random import (
+    randint,
+    choice as random_choice,
+)
+import string
+from django.contrib.auth.models import User
 from django_seed import Seed
 from faker import Faker
-from faker.providers import date_time
+from faker.providers import (
+    date_time,
+    profile,
+)
+from polls.models import (
+    Question,
+    Choice,
+    Vote,
+)
 
-from polls.models import Question, Choice
-from uuid import uuid4
+USERS = 4
+QUESTIONS = 7
+CHOICES = 14
+VOTES = 20
 
 
-def run(seed=randint(0, 99999)):
+def random_ascii_string(
+        length: int,
+        alphabet=string.digits + string.ascii_letters):
+    return ''.join(random_choice(alphabet) for _ in range(length))
+
+
+def set_valid_user_passwords():
+    credentials = dict()
+    for user in User.objects.all():
+        password = random_ascii_string(20)
+        user.set_password(password)
+        user.save()
+        credentials[user.username] = password
+    return credentials
+
+
+def run(seed=randint(0, 99999), supress_warnings=False, show_users=False):
     Faker.seed(seed)
     fake = Faker()
     fake.add_provider(date_time)
+    fake.add_provider(profile)
     seeder = Seed.seeder()
-    seeder.add_entity(Question, 7, {
+
+    seeder.add_entity(User, USERS, {
+        'username': lambda x: random_ascii_string(12),
+        'password': lambda x: 'blank',
+        'is_superuser': lambda x: False,
+        'is_staff': lambda x: False,
+        'is_active': lambda x: True,
+    })
+    seeder.add_entity(Question, QUESTIONS, {
         'pub_date': fake.date_time_between('-4d', 'now'),
     })
-    seeder.add_entity(Choice, 20, {
-        'choice_uuid': lambda x: uuid4(),
-        'votes': lambda x: randint(0, 50),
-    })
+    seeder.add_entity(Choice, CHOICES)
+
+    if supress_warnings:
+        logger = logging.getLogger()
+        logger.disabled = True
+        warnings.simplefilter('ignore')
     seeder.execute()
+
+    credentials = set_valid_user_passwords()
+    if show_users:
+        print('Created users (username --- password):')
+        for username, password in credentials.items():
+            print(f'{username} --- {password}')
 
 
 if __name__ == '__main__':
-    warnings.simplefilter('ignore')
-    run()
+    run(supress_warnings=True)
