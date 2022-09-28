@@ -1,1 +1,1 @@
-from .signals import set_question_slug
+from .signals import choice_is_related_to_question
