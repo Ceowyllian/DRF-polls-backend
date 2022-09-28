@@ -1,11 +1,23 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from . import apiviews
+from .apiviews import (
+    QuestionViewSet,
+    ChoiceList,
+    CreateVote,
+    UserCreate,
+    LoginView,
+)
 
+
+router = DefaultRouter()
+router.register('questions', QuestionViewSet, basename='questions')
 
 urlpatterns = [
-    path('questions/', apiviews.questions, name='questions'),
-    path('questions/<slug:question_slug>/', apiviews.question_detail, name='question_detail'),
-    path('questions/<slug:question_slug>/choices/', apiviews.choices, name='choices'),
-    path('questions/<slug:question_slug>/choices/<uuid:choice_uuid>/', apiviews.choice_detail, name='choice_detail'),
+    path('questions/<int:pk>/choices/', ChoiceList.as_view(), name='choice_list'),
+    path('questions/<int:pk>/choices/<int:choice_pk>/vote/', CreateVote.as_view(), name='create_vote'),
+    path('users/', UserCreate.as_view(), name='user_create'),
+    path('login/', LoginView.as_view(), name='login')
 ]
+
+urlpatterns += router.urls
