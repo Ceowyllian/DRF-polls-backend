@@ -21,7 +21,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action in ('list', 'retrieve'):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
