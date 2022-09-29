@@ -4,14 +4,17 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from rest_framework.test import (
-    APITestCase,
-)
+from rest_framework.test import APITestCase
 
 from polls import seeder
+from polls.models import Question
 
 
-class TestQuestions(APITestCase):
+class EndpointTestCase(APITestCase):
+    """
+    The base class for endpoint tests, which sets up test data and automatic
+    client authorization before each test.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -19,8 +22,7 @@ class TestQuestions(APITestCase):
         test_user = get_user_model().objects.create_user(
             'test',
             'test@example.com',
-            password='test'
-        )
+            password='test')
         test_token = Token.objects.create(user=test_user)
         cls.test_user = test_user
         cls.test_token = test_token
@@ -28,25 +30,101 @@ class TestQuestions(APITestCase):
     def setUp(self):
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.test_token.key}')
 
-    def test_questions_list(self):
-        self.client.logout()
-        response = self.client.get(reverse('questions-list'))
+    def assertStatusCodeEquals(self, received, expected):
         self.assertEqual(
-            response.status_code, status.HTTP_200_OK,
-            'Expected Response Code 200, received {0} instead.'
-            .format(response.status_code))
+            received, expected,
+            'Expected Response Code {0}, received {1} instead.'
+            .format(expected, received))
 
-    def test_create_question(self):
+
+class TestQuestionList(EndpointTestCase):
+    """
+    Tests for "questions-list" endpoint (list, create).
+    """
+
+    def test_list(self):
+        # The question list should be available without authorization.
+        self.client.logout()
+
+        response = self.client.get(reverse('questions-list'))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_200_OK)
+
+    def test_create(self):
         question = {
             'question_title': 'test_question',
             'question_text': 'test_text',
             'choices': []
         }
+
         response = self.client.post(
             path=reverse('questions-list'),
             content_type='application/json',
             data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_201_CREATED)
+
+
+class TestQuestionDetail(EndpointTestCase):
+    """
+    Tests for "questions-detail" endpoint (retrieve, update, destroy).
+    """
+
+    def test_retrieve(self):
+        # The question detail should be available without authorization.
+        self.client.logout()
+
+        question = Question.objects.create(
+            question_title='Test question title',
+            question_text='Test question text.',
+            created_by=self.test_user)
+
+        response = self.client.get(
+            path=reverse('questions-detail', args=[question.pk]))
+
         self.assertEqual(
-            response.status_code, status.HTTP_201_CREATED,
-            'Expected Response Code 201, received {0} instead.'
+            response.status_code, status.HTTP_200_OK,
+            'Expected Response Code 200, received {0} instead.'
             .format(response.status_code))
+
+        data = response.data
+        self.assertEqual(data['question_title'], question.question_title)
+        self.assertEqual(data['question_text'], question.question_text)
+        self.assertEqual(data['created_by'], self.test_user.pk)
+
+    def test_update(self):
+        question = Question.objects.create(
+            question_title='Test question title',
+            question_text='Test question text.',
+            created_by=self.test_user)
+        updated_fields = {
+            'question_title': 'Another title',
+            'question_text': 'Another text',
+        }
+
+        response = self.client.patch(
+            path=reverse('questions-detail', args=[question.pk]),
+            content_type='application/json',
+            data=json.dumps(updated_fields))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_200_OK)
+
+    def test_delete(self):
+        question = Question.objects.create(
+            question_title='Test question title',
+            question_text='Test question text.',
+            created_by=self.test_user)
+        question_id = question.pk
+
+        response_delete = self.client.delete(
+            reverse('questions-detail', args=[question_id]))
+        self.assertStatusCodeEquals(
+            response_delete.status_code, status.HTTP_204_NO_CONTENT)
+
+        response_retrieve = self.client.get(
+            reverse('questions-detail', args=[question_id]))
+        self.assertStatusCodeEquals(
+            response_retrieve.status_code, status.HTTP_404_NOT_FOUND)
