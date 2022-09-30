@@ -7,7 +7,7 @@ from . import Question
 
 
 class Choice(models.Model):
-    choice_text = models.CharField(max_length=60)
+    choice_text = models.CharField(max_length=60, null=False, blank=False)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     class Meta:
