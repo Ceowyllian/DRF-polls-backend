@@ -10,9 +10,9 @@ from polls import seeder
 from polls.models import Question
 
 
-class EndpointTestCase(APITestCase):
+class APIViewTestCase(APITestCase):
     """
-    The base class for endpoint tests, which sets up test data and automatic
+    The base class for APIView tests, which sets up test data and automatic
     client authorization before each test.
     """
 
@@ -37,12 +37,16 @@ class EndpointTestCase(APITestCase):
             .format(expected, received))
 
 
-class TestQuestionList(EndpointTestCase):
+class TestQuestionViewSet(APIViewTestCase):
     """
-    Tests for "questions-list" endpoint (list, create).
+    Tests for QuestionViewSet (list, create, retrieve, update, delete).
     """
 
     def test_list(self):
+        """
+        Testing the "GET" method for the "/questions" endpoint.
+        """
+
         # The question list should be available without authorization.
         self.client.logout()
 
@@ -51,11 +55,19 @@ class TestQuestionList(EndpointTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_200_OK)
 
-    def test_create(self):
+    def test_create_with_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
         question = {
             'question_title': 'test_question',
             'question_text': 'test_text',
-            'choices': []
+            'choices': [
+                {'choice_text': 'choice 1'},
+                {'choice_text': 'choice 2'},
+                {'choice_text': 'choice 3'},
+            ]
         }
 
         response = self.client.post(
@@ -66,13 +78,68 @@ class TestQuestionList(EndpointTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_201_CREATED)
 
+    def test_create_with_empty_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
 
-class TestQuestionDetail(EndpointTestCase):
-    """
-    Tests for "questions-detail" endpoint (retrieve, update, destroy).
-    """
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+            'choices': []
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_with_invalid_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+            'choices': [
+                {'choice_text': ''},
+            ]
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_without_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve(self):
+        """
+        Testing the "GET" method for the "/questions/<id>" endpoint.
+        """
+
         # The question detail should be available without authorization.
         self.client.logout()
 
@@ -84,10 +151,7 @@ class TestQuestionDetail(EndpointTestCase):
         response = self.client.get(
             path=reverse('questions-detail', args=[question.pk]))
 
-        self.assertEqual(
-            response.status_code, status.HTTP_200_OK,
-            'Expected Response Code 200, received {0} instead.'
-            .format(response.status_code))
+        self.assertStatusCodeEquals(response.status_code, status.HTTP_200_OK)
 
         data = response.data
         self.assertEqual(data['question_title'], question.question_title)
@@ -95,6 +159,10 @@ class TestQuestionDetail(EndpointTestCase):
         self.assertEqual(data['created_by'], self.test_user.pk)
 
     def test_update(self):
+        """
+        Testing the "PATCH" method for the "/questions/<id>" endpoint.
+        """
+
         question = Question.objects.create(
             question_title='Test question title',
             question_text='Test question text.',
@@ -113,6 +181,10 @@ class TestQuestionDetail(EndpointTestCase):
             response.status_code, status.HTTP_200_OK)
 
     def test_delete(self):
+        """
+        Testing the "DELETE" method for the "/questions/<id>" endpoint.
+        """
+
         question = Question.objects.create(
             question_title='Test question title',
             question_text='Test question text.',

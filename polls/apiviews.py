@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from .models import Question, Choice
 from .serializers import (
     QuestionSerializer,
+    QuestionWithChoicesSerializer,
     ChoiceSerializer,
     VoteSerializer,
     UserSerializer,
@@ -17,13 +18,21 @@ from .serializers import (
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
+
+    def get_queryset(self):
+        queryset = Question.objects.prefetch_related('choice_set')
+        return queryset
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'update', 'partial_update', 'destroy'):
+            return QuestionSerializer
+        if self.action in ('create', 'retrieve'):
+            return QuestionWithChoicesSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -36,7 +45,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class ChoiceList(generics.ListCreateAPIView):
+class ChoiceList(generics.CreateAPIView):
     def get_queryset(self):
         queryset = Choice.objects.filter(question_id=self.kwargs['pk'])
         return queryset
