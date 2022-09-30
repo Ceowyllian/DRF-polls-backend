@@ -42,6 +42,13 @@ class TestQuestionViewSet(APIViewTestCase):
     Tests for QuestionViewSet (list, create, retrieve, update, delete).
     """
 
+    def _test_question(self):
+        return Question.objects.get_or_create(
+            question_title='Test question title',
+            question_text='Test question text.',
+            created_by=self.test_user
+        )[0]
+
     def test_list(self):
         """
         Testing the "GET" method for the "/questions" endpoint.
@@ -143,10 +150,7 @@ class TestQuestionViewSet(APIViewTestCase):
         # The question detail should be available without authorization.
         self.client.logout()
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
 
         response = self.client.get(
             path=reverse('question-detail', args=[question.pk]))
@@ -163,10 +167,7 @@ class TestQuestionViewSet(APIViewTestCase):
         Testing the "PATCH" method for the "/questions/<id>" endpoint.
         """
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
         updated_fields = {
             'question_title': 'Another title',
             'question_text': 'Another text',
@@ -185,10 +186,7 @@ class TestQuestionViewSet(APIViewTestCase):
         Testing the "DELETE" method for the "/questions/<id>" endpoint.
         """
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
         question_id = question.pk
 
         response_delete = self.client.delete(
