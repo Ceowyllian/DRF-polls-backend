@@ -50,7 +50,7 @@ class TestQuestionViewSet(APIViewTestCase):
         # The question list should be available without authorization.
         self.client.logout()
 
-        response = self.client.get(reverse('questions-list'))
+        response = self.client.get(reverse('question-list'))
 
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_200_OK)
@@ -71,7 +71,7 @@ class TestQuestionViewSet(APIViewTestCase):
         }
 
         response = self.client.post(
-            path=reverse('questions-list'),
+            path=reverse('question-list'),
             content_type='application/json',
             data=json.dumps(question))
 
@@ -90,7 +90,7 @@ class TestQuestionViewSet(APIViewTestCase):
         }
 
         response = self.client.post(
-            path=reverse('questions-list'),
+            path=reverse('question-list'),
             content_type='application/json',
             data=json.dumps(question))
         self.assertStatusCodeEquals(
@@ -110,7 +110,7 @@ class TestQuestionViewSet(APIViewTestCase):
         }
 
         response = self.client.post(
-            path=reverse('questions-list'),
+            path=reverse('question-list'),
             content_type='application/json',
             data=json.dumps(question))
 
@@ -128,7 +128,7 @@ class TestQuestionViewSet(APIViewTestCase):
         }
 
         response = self.client.post(
-            path=reverse('questions-list'),
+            path=reverse('question-list'),
             content_type='application/json',
             data=json.dumps(question))
 
@@ -149,7 +149,7 @@ class TestQuestionViewSet(APIViewTestCase):
             created_by=self.test_user)
 
         response = self.client.get(
-            path=reverse('questions-detail', args=[question.pk]))
+            path=reverse('question-detail', args=[question.pk]))
 
         self.assertStatusCodeEquals(response.status_code, status.HTTP_200_OK)
 
@@ -173,7 +173,7 @@ class TestQuestionViewSet(APIViewTestCase):
         }
 
         response = self.client.patch(
-            path=reverse('questions-detail', args=[question.pk]),
+            path=reverse('question-detail', args=[question.pk]),
             content_type='application/json',
             data=json.dumps(updated_fields))
 
@@ -192,11 +192,11 @@ class TestQuestionViewSet(APIViewTestCase):
         question_id = question.pk
 
         response_delete = self.client.delete(
-            reverse('questions-detail', args=[question_id]))
+            reverse('question-detail', args=[question_id]))
         self.assertStatusCodeEquals(
             response_delete.status_code, status.HTTP_204_NO_CONTENT)
 
         response_retrieve = self.client.get(
-            reverse('questions-detail', args=[question_id]))
+            reverse('question-detail', args=[question_id]))
         self.assertStatusCodeEquals(
             response_retrieve.status_code, status.HTTP_404_NOT_FOUND)

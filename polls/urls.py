@@ -11,12 +11,12 @@ from .apiviews import (
 
 
 router = DefaultRouter()
-router.register('questions', QuestionViewSet, basename='questions')
+router.register('question', QuestionViewSet, basename='question')
 
 urlpatterns = [
-    path('questions/<int:pk>/choices/', ChoiceList.as_view(), name='choice_list'),
-    path('questions/<int:pk>/choices/<int:choice_pk>/vote/', CreateVote.as_view(), name='create_vote'),
-    path('users/', UserCreate.as_view(), name='user_create'),
+    path('questions/<int:pk>/choices/', ChoiceList.as_view(), name='choice-list'),
+    path('questions/<int:pk>/choices/<int:choice_pk>/vote/', CreateVote.as_view(), name='vote-create'),
+    path('users/', UserCreate.as_view(), name='user-create'),
     path('login/', LoginView.as_view(), name='login')
 ]
 
