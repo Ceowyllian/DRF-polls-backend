@@ -13,3 +13,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text
+
+    def choices(self):
+        return self.choice_set
