@@ -55,7 +55,30 @@ class TestQuestionViewSet(APIViewTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_200_OK)
 
-    def test_create(self):
+    def test_create_with_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+            'choices': [
+                {'choice_text': 'choice 1'},
+                {'choice_text': 'choice 2'},
+                {'choice_text': 'choice 3'},
+            ]
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_with_empty_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -70,9 +93,47 @@ class TestQuestionViewSet(APIViewTestCase):
             path=reverse('questions-list'),
             content_type='application/json',
             data=json.dumps(question))
-
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_with_invalid_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+            'choices': [
+                {'choice_text': ''},
+            ]
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_without_choices(self):
+        """
+        Testing the "POST" method for the "/questions" endpoint.
+        """
+
+        question = {
+            'question_title': 'test_question',
+            'question_text': 'test_text',
+        }
+
+        response = self.client.post(
+            path=reverse('questions-list'),
+            content_type='application/json',
+            data=json.dumps(question))
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve(self):
         """
