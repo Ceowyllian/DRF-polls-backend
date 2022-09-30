@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -23,11 +24,9 @@ class VoteSerializer(serializers.ModelSerializer):
 
 
 class ChoiceSerializer(serializers.ModelSerializer):
-    votes = VoteSerializer(many=True, required=False)
-
     class Meta:
         model = Choice
-        fields = '__all__'
+        fields = ['choice_text']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -38,7 +37,15 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuestionWithChoicesSerializer(QuestionSerializer):
-    choices = ChoiceSerializer(many=True, required=False)
+    choices = ChoiceSerializer(many=True, required=True)
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            choices_data = validated_data.pop('choices', None)
+            question = Question.objects.create(**validated_data)
+            for choice_data in choices_data:
+                Choice.objects.create(question=question, **choice_data)
+        return question
 
 
 class UserSerializer(serializers.ModelSerializer):
