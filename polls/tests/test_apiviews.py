@@ -10,9 +10,9 @@ from polls import seeder
 from polls.models import Question
 
 
-class APIViewTestCase(APITestCase):
+class PollsAPITestCase(APITestCase):
     """
-    The base class for APIView tests, which sets up test data and automatic
+    The base class for polls API tests, which sets up test data and automatic
     client authorization before each test.
     """
 
@@ -37,7 +37,7 @@ class APIViewTestCase(APITestCase):
             .format(expected, received))
 
 
-class TestQuestionViewSet(APIViewTestCase):
+class TestQuestionViewSet(PollsAPITestCase):
     """
     Tests for QuestionViewSet (list, create, retrieve, update, delete).
     """
@@ -85,7 +85,7 @@ class TestQuestionViewSet(APIViewTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_201_CREATED)
 
-    def test_create_with_empty_choices(self):
+    def test_fail_create_with_empty_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -101,9 +101,9 @@ class TestQuestionViewSet(APIViewTestCase):
             content_type='application/json',
             data=json.dumps(question))
         self.assertStatusCodeEquals(
-            response.status_code, status.HTTP_201_CREATED)
+            response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_with_invalid_choices(self):
+    def test_fail_create_with_invalid_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -112,6 +112,9 @@ class TestQuestionViewSet(APIViewTestCase):
             'question_title': 'test_question',
             'question_text': 'test_text',
             'choices': [
+                {'choice_text': ''},
+                {'choice_text': ''},
+                {'choice_text': ''},
                 {'choice_text': ''},
             ]
         }
@@ -124,7 +127,7 @@ class TestQuestionViewSet(APIViewTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_without_choices(self):
+    def test_fail_create_without_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """

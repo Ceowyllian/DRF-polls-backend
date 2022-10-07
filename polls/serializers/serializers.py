@@ -39,9 +39,17 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuestionWithChoicesSerializer(QuestionSerializer):
     choices = ChoiceSerializer(many=True, required=True)
 
+    def validate_choices(self, choices_data):
+        choices = [choice['choice_text'] for choice in choices_data]
+        if len(choices) < 2:
+            raise serializers.ValidationError('At least 2 choices are required.')
+        if len(choices) > len(set(choices)):
+            raise serializers.ValidationError('The answers to the question must be different.')
+        return choices_data
+
     def create(self, validated_data):
+        choices_data = validated_data.pop('choices', None)
         with transaction.atomic():
-            choices_data = validated_data.pop('choices', None)
             question = Question.objects.create(**validated_data)
             for choice_data in choices_data:
                 Choice.objects.create(question=question, **choice_data)
