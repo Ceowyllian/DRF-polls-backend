@@ -7,11 +7,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Question, Choice
+from .models import Question
 from .serializers import (
     QuestionSerializer,
     QuestionWithChoicesSerializer,
-    ChoiceSerializer,
     VoteSerializer,
     UserSerializer,
 )
@@ -38,25 +37,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         user = self.request.user
         serializer.save(created_by=user)
 
-    def destroy(self, request, *args, **kwargs):
-        question = Question.objects.get(pk=self.kwargs['pk'])
-        if not request.user == question.created_by:
+    def perform_destroy(self, instance):
+        if self.request.user != instance.created_by:
             raise PermissionDenied('You can not delete this poll.')
-        return super().destroy(request, *args, **kwargs)
-
-
-class ChoiceList(generics.CreateAPIView):
-    def get_queryset(self):
-        queryset = Choice.objects.filter(question_id=self.kwargs['pk'])
-        return queryset
-
-    serializer_class = ChoiceSerializer
-
-    def post(self, request, *args, **kwargs):
-        question = Question.objects.get(pk=self.kwargs['pk'])
-        if not request.user == question.created_by:
-            raise PermissionDenied('You can not create choice for this question.')
-        return super().post(request, *args, **kwargs)
+        instance.delete()
 
 
 class CreateVote(generics.CreateAPIView):
