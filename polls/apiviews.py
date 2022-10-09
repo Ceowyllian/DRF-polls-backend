@@ -3,7 +3,6 @@ from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -43,20 +42,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 
-class CreateVote(generics.CreateAPIView):
+class VoteView(generics.CreateAPIView):
     serializer_class = VoteSerializer
 
-    def post(self, request: Request, pk, choice_pk):
-        serializer = VoteSerializer(data={
-            'choice': choice_pk,
-            'question': pk,
-            'voted_by': request.user.pk,
-        })
-        if serializer.is_valid():
-            vote = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer: VoteSerializer):
+        user = self.request.user
+        serializer.save(voted_by=user)
 
 
 class UserCreate(generics.CreateAPIView):
