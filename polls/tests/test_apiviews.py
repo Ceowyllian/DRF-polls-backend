@@ -1,53 +1,16 @@
 import json
 
-from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase
 
-from polls import seeder
-from polls.models import Question
-
-
-class PollsAPITestCase(APITestCase):
-    """
-    The base class for polls API tests, which sets up test data and automatic
-    client authorization before each test.
-    """
-
-    @classmethod
-    def setUpTestData(cls):
-        seeder.run(supress_warnings=True)
-        test_user = get_user_model().objects.create_user(
-            'test',
-            'test@example.com',
-            password='test')
-        test_token = Token.objects.create(user=test_user)
-        cls.test_user = test_user
-        cls.test_token = test_token
-
-    def setUp(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.test_token.key}')
-
-    def assertStatusCodeEquals(self, received, expected):
-        self.assertEqual(
-            received, expected,
-            'Expected Response Code {0}, received {1} instead.'
-            .format(expected, received))
+from polls.models import Choice
+from .base import PollsAPITestCase
 
 
 class TestQuestionViewSet(PollsAPITestCase):
     """
     Tests for QuestionViewSet (list, create, retrieve, update, delete).
     """
-
-    def _test_question(self):
-        return Question.objects.get_or_create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user
-        )[0]
 
     def test_list(self):
         """
@@ -201,3 +164,65 @@ class TestQuestionViewSet(PollsAPITestCase):
             reverse('question-detail', args=[question_id]))
         self.assertStatusCodeEquals(
             response_retrieve.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestVoteAPI(PollsAPITestCase):
+
+    def test_vote(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        response = self.client.post(url, data={
+            'choice': choice.pk,
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_201_CREATED)
+
+    def test_fail_vote_twice(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        response_vote_1 = self.client.post(url, data={
+            'choice': choice.pk
+        })
+        response_vote_2 = self.client.post(url, data={
+            'choice': choice.pk
+        })
+
+        self.assertStatusCodeEquals(
+            response_vote_1.status_code, status.HTTP_201_CREATED)
+        self.assertStatusCodeEquals(
+            response_vote_2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_fail_vote_unauthorized(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        self.client.logout()
+        response = self.client.post(url, data={
+            'choice': choice.pk
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_fail_choice_does_not_exist(self):
+        non_existent_choice = 'bla bla bla'
+        url = reverse('vote')
+
+        response = self.client.post(url, data={
+            'choice': non_existent_choice
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
