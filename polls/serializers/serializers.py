@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import transaction
-from rest_framework import serializers
 from rest_framework.authtoken.models import Token
+from rest_framework.serializers import ValidationError, ModelSerializer
 
 from polls.models import (
     Question,
@@ -10,26 +10,28 @@ from polls.models import (
 )
 
 
-class VoteSerializer(serializers.ModelSerializer):
+class VoteSerializer(ModelSerializer):
     class Meta:
         model = Vote
         fields = '__all__'
+        read_only_fields = ['voted_by', 'date_voted', 'question']
 
     def create(self, validated_data):
-        return Vote.objects.create(
-            voted_by=validated_data['voted_by'],
-            choice=validated_data['choice'],
-            question=validated_data['question']
-        )
+        choice = validated_data['choice']
+        vote, created = Vote.objects.get_or_create(
+            **validated_data, question=choice.question)
+        if not created:
+            raise ValidationError("You can't vote twice for the same choice!")
+        return vote
 
 
-class ChoiceSerializer(serializers.ModelSerializer):
+class ChoiceSerializer(ModelSerializer):
     class Meta:
         model = Choice
         fields = ['choice_text']
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = '__all__'
@@ -42,9 +44,9 @@ class QuestionWithChoicesSerializer(QuestionSerializer):
     def validate_choices(self, choices_data):
         choices = [choice['choice_text'] for choice in choices_data]
         if len(choices) < 2:
-            raise serializers.ValidationError('At least 2 choices are required.')
+            raise ValidationError('At least 2 choices are required.')
         if len(choices) > len(set(choices)):
-            raise serializers.ValidationError('The answers to the question must be different.')
+            raise ValidationError('The answers to the question must be different.')
         return choices_data
 
     def create(self, validated_data):
@@ -56,7 +58,7 @@ class QuestionWithChoicesSerializer(QuestionSerializer):
         return question
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
@@ -65,8 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User(
             email=validated_data['email'],
-            username=validated_data['username']
-        )
+            username=validated_data['username'])
         user.set_password(validated_data['password'])
         user.save()
         Token.objects.create(user=user)
