@@ -18,7 +18,11 @@ from .serializers import (
 class QuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
-        queryset = Question.objects.prefetch_related('choice_set')
+        queryset = Question.objects.all()
+        if self.action == 'retrieve':
+            queryset = queryset.prefetch_related('choice_set')
+        if username := self.request.query_params.get('username'):
+            queryset = queryset.filter(created_by__username=username)
         return queryset
 
     def get_permissions(self):
@@ -62,8 +66,7 @@ class LoginView(APIView):
     def post(self, request, ):
         username = request.data.get('username')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
+        if user := authenticate(username=username, password=password):
             return Response({'token': user.auth_token.key},
                             status=status.HTTP_201_CREATED)
         else:
