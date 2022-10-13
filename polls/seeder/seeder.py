@@ -1,4 +1,4 @@
-from django.db import DatabaseError
+from django.contrib.auth import get_user_model
 import logging
 if __name__ == '__main__':
     import os
@@ -13,7 +13,6 @@ from random import (
     choice as random_choice,
 )
 import string
-from django.contrib.auth.models import User
 from django_seed import Seed
 from faker import Faker
 from faker.providers import (
@@ -30,6 +29,8 @@ USERS = 4
 QUESTIONS = 7
 CHOICES = 14
 VOTES = 20
+
+User = get_user_model()
 
 
 def random_ascii_string(
