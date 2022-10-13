@@ -1,13 +1,19 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework.authtoken.models import Token
-from rest_framework.serializers import ValidationError, ModelSerializer
+from rest_framework.serializers import (
+    ValidationError,
+    ModelSerializer,
+)
 
+from polls import services
 from polls.models import (
     Question,
     Choice,
     Vote,
 )
+
+User = get_user_model()
 
 
 class VoteSerializer(ModelSerializer):
@@ -17,11 +23,7 @@ class VoteSerializer(ModelSerializer):
         read_only_fields = ['voted_by', 'date_voted', 'question']
 
     def create(self, validated_data):
-        choice = validated_data['choice']
-        vote, created = Vote.objects.get_or_create(
-            **validated_data, question=choice.question)
-        if not created:
-            raise ValidationError("You can't vote twice for the same choice!")
+        vote = services.vote.perform_vote(**validated_data)
         return vote
 
 
@@ -34,12 +36,19 @@ class ChoiceSerializer(ModelSerializer):
 class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
-        fields = '__all__'
-        read_only_fields = ['created_by']
+        fields = ['question_title', 'created_by', 'pub_date']
+        read_only_fields = ['created_by', 'pub_date']
+
+    def create(self, validated_data):
+        raise NotImplementedError(
+            "You must implement the creation of questions with multiple choices!")
 
 
 class QuestionWithChoicesSerializer(QuestionSerializer):
     choices = ChoiceSerializer(many=True, required=True)
+
+    class Meta(QuestionSerializer.Meta):
+        fields = '__all__'
 
     def validate_choices(self, choices_data):
         choices = [choice['choice_text'] for choice in choices_data]
