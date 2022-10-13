@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_seed',
+    'custom_auth',
     'polls',
 ]
 
@@ -136,3 +137,5 @@ REST_FRAMEWORK = {
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
+
+AUTH_USER_MODEL = 'custom_auth.CustomUser'
