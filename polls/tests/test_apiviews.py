@@ -1,43 +1,13 @@
 import json
 
-from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase
 
-from polls import seeder
-from polls.models import Question
-
-
-class APIViewTestCase(APITestCase):
-    """
-    The base class for APIView tests, which sets up test data and automatic
-    client authorization before each test.
-    """
-
-    @classmethod
-    def setUpTestData(cls):
-        seeder.run(supress_warnings=True)
-        test_user = get_user_model().objects.create_user(
-            'test',
-            'test@example.com',
-            password='test')
-        test_token = Token.objects.create(user=test_user)
-        cls.test_user = test_user
-        cls.test_token = test_token
-
-    def setUp(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.test_token.key}')
-
-    def assertStatusCodeEquals(self, received, expected):
-        self.assertEqual(
-            received, expected,
-            'Expected Response Code {0}, received {1} instead.'
-            .format(expected, received))
+from polls.models import Choice
+from .base import PollsAPITestCase
 
 
-class TestQuestionViewSet(APIViewTestCase):
+class TestQuestionViewSet(PollsAPITestCase):
     """
     Tests for QuestionViewSet (list, create, retrieve, update, delete).
     """
@@ -78,7 +48,7 @@ class TestQuestionViewSet(APIViewTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_201_CREATED)
 
-    def test_create_with_empty_choices(self):
+    def test_fail_create_with_empty_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -94,9 +64,9 @@ class TestQuestionViewSet(APIViewTestCase):
             content_type='application/json',
             data=json.dumps(question))
         self.assertStatusCodeEquals(
-            response.status_code, status.HTTP_201_CREATED)
+            response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_with_invalid_choices(self):
+    def test_fail_create_with_invalid_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -105,6 +75,9 @@ class TestQuestionViewSet(APIViewTestCase):
             'question_title': 'test_question',
             'question_text': 'test_text',
             'choices': [
+                {'choice_text': ''},
+                {'choice_text': ''},
+                {'choice_text': ''},
                 {'choice_text': ''},
             ]
         }
@@ -117,7 +90,7 @@ class TestQuestionViewSet(APIViewTestCase):
         self.assertStatusCodeEquals(
             response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_without_choices(self):
+    def test_fail_create_without_choices(self):
         """
         Testing the "POST" method for the "/questions" endpoint.
         """
@@ -143,10 +116,7 @@ class TestQuestionViewSet(APIViewTestCase):
         # The question detail should be available without authorization.
         self.client.logout()
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
 
         response = self.client.get(
             path=reverse('questions-detail', args=[question.pk]))
@@ -163,10 +133,7 @@ class TestQuestionViewSet(APIViewTestCase):
         Testing the "PATCH" method for the "/questions/<id>" endpoint.
         """
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
         updated_fields = {
             'question_title': 'Another title',
             'question_text': 'Another text',
@@ -185,10 +152,7 @@ class TestQuestionViewSet(APIViewTestCase):
         Testing the "DELETE" method for the "/questions/<id>" endpoint.
         """
 
-        question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text.',
-            created_by=self.test_user)
+        question = self._test_question()
         question_id = question.pk
 
         response_delete = self.client.delete(
@@ -200,3 +164,65 @@ class TestQuestionViewSet(APIViewTestCase):
             reverse('questions-detail', args=[question_id]))
         self.assertStatusCodeEquals(
             response_retrieve.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestVoteAPI(PollsAPITestCase):
+
+    def test_vote(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        response = self.client.post(url, data={
+            'choice': choice.pk,
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_201_CREATED)
+
+    def test_fail_vote_twice(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        response_vote_1 = self.client.post(url, data={
+            'choice': choice.pk
+        })
+        response_vote_2 = self.client.post(url, data={
+            'choice': choice.pk
+        })
+
+        self.assertStatusCodeEquals(
+            response_vote_1.status_code, status.HTTP_201_CREATED)
+        self.assertStatusCodeEquals(
+            response_vote_2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_fail_vote_unauthorized(self):
+        choice = Choice.objects.create(
+            choice_text='Test choice',
+            question=self._test_question()
+        )
+        url = reverse('vote')
+
+        self.client.logout()
+        response = self.client.post(url, data={
+            'choice': choice.pk
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_fail_choice_does_not_exist(self):
+        non_existent_choice = 'bla bla bla'
+        url = reverse('vote')
+
+        response = self.client.post(url, data={
+            'choice': non_existent_choice
+        })
+
+        self.assertStatusCodeEquals(
+            response.status_code, status.HTTP_400_BAD_REQUEST)
