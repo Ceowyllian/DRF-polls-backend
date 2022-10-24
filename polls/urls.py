@@ -7,7 +7,7 @@ from .apiviews import (
 )
 
 router = DefaultRouter()
-router.register('question', QuestionViewSet, basename='question')
+router.register('questions', QuestionViewSet, basename='questions')
 
 urlpatterns = [
     path('votes/', VoteView.as_view(), name='vote'),
