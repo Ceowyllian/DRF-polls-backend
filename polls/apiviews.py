@@ -1,17 +1,13 @@
-from django.contrib.auth import authenticate
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Question
 from .serializers import (
     QuestionSerializer,
     QuestionWithChoicesSerializer,
     VoteSerializer,
-    UserSerializer,
 )
 
 
@@ -42,8 +38,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         if self.request.user != instance.created_by:
-            raise PermissionDenied('You can not delete this poll.')
+            raise PermissionDenied('You can not delete this question.')
         instance.delete()
+
+    def perform_update(self, serializer):
+        if self.request.user != serializer.instance.created_by:
+            raise PermissionDenied('You can not edit this question.')
+        serializer.save()
 
 
 class VoteView(generics.CreateAPIView):
@@ -52,23 +53,3 @@ class VoteView(generics.CreateAPIView):
     def perform_create(self, serializer: VoteSerializer):
         user = self.request.user
         serializer.save(voted_by=user)
-
-
-class UserCreate(generics.CreateAPIView):
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = UserSerializer
-
-
-class LoginView(APIView):
-    permission_classes = ()
-
-    def post(self, request, ):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        if user := authenticate(username=username, password=password):
-            return Response({'token': user.auth_token.key},
-                            status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': 'Wrong Credentials'},
-                            status=status.HTTP_400_BAD_REQUEST)
