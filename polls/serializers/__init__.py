@@ -3,5 +3,4 @@ from .serializers import (
     QuestionWithChoicesSerializer,
     ChoiceSerializer,
     VoteSerializer,
-    UserSerializer,
 )

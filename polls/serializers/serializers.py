@@ -1,6 +1,4 @@
-from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework.authtoken.models import Token
 from rest_framework.serializers import (
     ValidationError,
     ModelSerializer,
@@ -12,8 +10,6 @@ from polls.models import (
     Choice,
     Vote,
 )
-
-User = get_user_model()
 
 
 class VoteSerializer(ModelSerializer):
@@ -41,7 +37,8 @@ class QuestionSerializer(ModelSerializer):
 
     def create(self, validated_data):
         raise NotImplementedError(
-            "You must implement the creation of questions with multiple choices!")
+            "You must implement the creation of questions with multiple choices!"
+        )
 
 
 class QuestionWithChoicesSerializer(QuestionSerializer):
@@ -65,19 +62,3 @@ class QuestionWithChoicesSerializer(QuestionSerializer):
             for choice_data in choices_data:
                 Choice.objects.create(question=question, **choice_data)
         return question
-
-
-class UserSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = User(
-            email=validated_data['email'],
-            username=validated_data['username'])
-        user.set_password(validated_data['password'])
-        user.save()
-        Token.objects.create(user=user)
-        return user
