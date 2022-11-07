@@ -1,55 +1,90 @@
-from rest_framework import generics
+from django.http import Http404
+from rest_framework import generics, status
 from rest_framework import permissions
-from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import views
+from rest_framework.response import Response
 
+from . import serializers, services
 from .models import Question
-from .serializers import (
-    QuestionSerializer,
-    QuestionWithChoicesSerializer,
-    VoteSerializer,
-)
 
 
-class QuestionViewSet(viewsets.ModelViewSet):
-
-    def get_queryset(self):
-        queryset = Question.objects.all()
-        if self.action == 'retrieve':
-            queryset = queryset.prefetch_related('choice_set')
-        if username := self.request.query_params.get('username'):
-            queryset = queryset.filter(created_by__username=username)
-        return queryset
+class QuestionListCreateAPI(views.APIView):
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
+        if self.request.method == 'GET':
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
 
-    def get_serializer_class(self):
-        if self.action in ('list', 'update', 'partial_update', 'destroy'):
-            return QuestionSerializer
-        if self.action in ('create', 'retrieve'):
-            return QuestionWithChoicesSerializer
+    def get(self, request, *args, **kwargs):
+        queryset = Question.objects.all()
+        serializer = serializers.QuestionListSerializer(instance=queryset, many=True)
+        return Response(data=serializer.data)
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(created_by=user)
+    def post(self, request, *args, **kwargs):
+        input = serializers.QuestionCreateSerializer(data=request.data)
+        input.is_valid(raise_exception=True)
+        question = services.question.create(
+            **input.validated_data,
+            created_by=request.user
+        )
+        output = serializers.QuestionDetailSerializer(instance=question)
+        return Response(data=output.data, status=status.HTTP_201_CREATED)
 
-    def perform_destroy(self, instance):
-        if self.request.user != instance.created_by:
-            raise PermissionDenied('You can not delete this question.')
-        instance.delete()
 
-    def perform_update(self, serializer):
-        if self.request.user != serializer.instance.created_by:
-            raise PermissionDenied('You can not edit this question.')
-        serializer.save()
+class QuestionRetrieveUpdateDeleteAPI(views.APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [permissions.IsAuthenticated()]
+
+    def get(self, request, *args, **kwargs):
+        question = services.question.retrieve(
+            question_pk=kwargs['pk'],
+            prefetch_choices=True,
+        )
+        output = serializers.QuestionDetailSerializer(instance=question)
+        return Response(data=output.data)
+
+    def delete(self, request, *args, **kwargs):
+        services.question.destroy(
+            question_pk=kwargs['pk'],
+            destroyed_by=request.user
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_update(self, partial=False):
+        input = serializers.QuestionUpdateSerializer(
+            data=self.request.data,
+            partial=partial
+        )
+        input.is_valid(raise_exception=True)
+        question = services.question.update(
+            question_pk=self.kwargs['pk'],
+            updated_by=self.request.user,
+            data=input.validated_data
+        )
+        output = serializers.QuestionDetailSerializer(instance=question)
+        return Response(data=output.data)
+
+    def patch(self, request, *args, **kwargs):
+        return self.perform_update(partial=True)
+
+    def put(self, request, *args, **kwargs):
+        return self.perform_update(partial=False)
+
+    def handle_exception(self, exc):
+        if isinstance(exc, Question.DoesNotExist):
+            raise Http404
+        return super(QuestionRetrieveUpdateDeleteAPI, self).handle_exception(exc)
 
 
 class VoteView(generics.CreateAPIView):
-    serializer_class = VoteSerializer
+    serializer_class = serializers.VoteSerializer
 
-    def perform_create(self, serializer: VoteSerializer):
-        user = self.request.user
-        serializer.save(voted_by=user)
+    def perform_create(self, serializer):
+        services.vote.perform_vote(
+            **serializer.validated_data,
+            voted_by=self.request.user
+        )
