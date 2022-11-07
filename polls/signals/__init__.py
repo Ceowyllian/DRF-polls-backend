@@ -1,1 +1,0 @@
-from .signals import choice_is_related_to_question
