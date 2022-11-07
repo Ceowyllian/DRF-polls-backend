@@ -1,32 +1,77 @@
-from typing import List, TypedDict
+from typing import List, Dict, Any
 
-from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 
-from polls.models import Question, Choice as ChoiceModel
+from polls.models import (
+    Question,
+    Choice,
+    QuestionConfig
+)
+from utils.services import model_update
 
-User = get_user_model()
+
+def retrieve(question_pk: int, prefetch_choices: object = False) -> Question:
+    queryset = Question.objects.select_related('created_by')
+    if prefetch_choices:
+        queryset = queryset.prefetch_related('choice_set')
+    return queryset.get(id=question_pk)
 
 
-class Choice(TypedDict):
-    choice_text: str
+def update(question_pk: int, updated_by: Any, data: Dict[str, Any]) -> Question:
+    question = retrieve(question_pk=question_pk)
+    if updated_by != question.created_by:
+        raise PermissionDenied("You can't edit this question.")
 
-
-def create_question_with_choices(
-        question_title: str,
-        question_text: str,
-        created_by: User,
-        choices: List[Choice]
-) -> Question:
-    with transaction.atomic():
-        question = Question.objects.create(
-            question_title=question_title,
-            question_text=question_text,
-            created_by=created_by,
-        )
-        for choice_attrs in choices:
-            ChoiceModel.objects.create(
-                **choice_attrs,
-                question=question
-            )
+    question, has_updated = model_update(
+        instance=question,
+        fields=['question_title', 'question_text'],
+        data=data
+    )
     return question
+
+
+def destroy(question_pk: int, destroyed_by: Any):
+    question = retrieve(question_pk=question_pk)
+    if destroyed_by != question.created_by:
+        raise PermissionDenied("You can't delete this question.")
+    question.delete()
+
+
+def create_question_instance(question_title: str, question_text: str, created_by: Any) -> Question:
+    question = Question(
+        question_title=question_title,
+        question_text=question_text,
+        created_by=created_by
+    )
+    question.full_clean()
+    return question
+
+
+def create_choice_instances(choices: List[str], question: Question) -> List[Choice]:
+    number = len(choices)
+    if number > QuestionConfig.CHOICES_MAX_NUMBER:
+        raise ValidationError(
+            'Too many choices, maximum %s allowed.'
+            % QuestionConfig.CHOICES_MAX_NUMBER
+        )
+    if number < QuestionConfig.CHOICES_MIN_NUMBER:
+        raise ValidationError(
+            'Too few choices, minimum %s required.'
+            % QuestionConfig.CHOICES_MIN_NUMBER
+        )
+    if number > len(set(choices)):
+        raise ValidationError('The choices must be different.')
+    instances = [Choice(choice_text=text, question=question) for text in choices]
+    for instance in instances:
+        instance.full_clean(validate_unique=False, validate_constraints=False)
+    return instances
+
+
+def create(question_title: str, question_text: str, created_by: Any, choices: List[str]) -> Question:
+    question = create_question_instance(question_title, question_text, created_by)
+    with transaction.atomic():
+        question.save()
+        choice_instances = create_choice_instances(choices=choices, question=question)
+        Choice.objects.bulk_create(objs=choice_instances)
+    return retrieve(question_pk=question.pk, prefetch_choices=True)
