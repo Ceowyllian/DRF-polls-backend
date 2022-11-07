@@ -1,16 +1,13 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
 
 from .apiviews import (
-    QuestionViewSet,
+    QuestionListCreateAPI,
+    QuestionRetrieveUpdateDeleteAPI,
     VoteView,
 )
 
-router = DefaultRouter()
-router.register('questions', QuestionViewSet, basename='questions')
-
 urlpatterns = [
+    path('questions/', QuestionListCreateAPI.as_view()),
+    path('questions/<int:pk>/', QuestionRetrieveUpdateDeleteAPI.as_view()),
     path('votes/', VoteView.as_view(), name='vote'),
 ]
-
-urlpatterns += router.urls
