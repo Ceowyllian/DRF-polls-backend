@@ -1,13 +1,28 @@
+from django.core.validators import MaxLengthValidator
 from django.db import (
     models,
 )
 from django.db.models import UniqueConstraint
 
-from . import Question
+
+class ChoiceConfig:
+    TEXT_MIN_LEN = 1
+    TEXT_MAX_LEN = 60
 
 
 class Choice(models.Model):
-    choice_text = models.CharField(max_length=60, null=False, blank=False)
+    choice_text = models.CharField(
+        max_length=ChoiceConfig.TEXT_MAX_LEN,
+        validators=[
+            MaxLengthValidator(
+                limit_value=ChoiceConfig.TEXT_MAX_LEN,
+                message='Choice text must less than %s characters long.'
+                        % ChoiceConfig.TEXT_MAX_LEN
+            )
+        ]
+    )
+
+    from . import Question
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     class Meta:
