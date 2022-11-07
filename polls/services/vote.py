@@ -1,24 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from rest_framework.serializers import ValidationError
+# TODO: replace 'rest_framework.exceptions' with 'django.core.exceptions'
+from rest_framework.exceptions import ValidationError
 
-from polls.models import Vote
+from polls.models import Vote, Choice
 
 User = get_user_model()
 
 
-def perform_vote(choice, voted_by) -> Vote:
+def perform_vote(choice_pk: int, voted_by: User) -> Vote:
+    choice = Choice.objects.select_related('question').get(id=choice_pk)
+    vote = Vote(choice=choice, question=choice.question, voted_by=voted_by)
+    vote.full_clean(validate_constraints=False, validate_unique=False)
     try:
-        vote, created = Vote.objects.get_or_create(
-            choice=choice,
-            question=choice.question,
-            voted_by=voted_by
-        )
+        vote.save()
     except IntegrityError:
         raise ValidationError("You can't vote twice for the same question!")
-
-    # Raise an error if the vote already exists
-    if not created:
-        raise ValidationError("You can't vote twice for the same choice!")
-
     return vote

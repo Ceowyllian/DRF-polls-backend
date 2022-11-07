@@ -1,5 +1,7 @@
-from django.contrib.auth import get_user_model
 import logging
+
+from django.contrib.auth import get_user_model
+
 if __name__ == '__main__':
     import os
     import django
@@ -22,7 +24,6 @@ from faker.providers import (
 from polls.models import (
     Question,
     Choice,
-    Vote,
 )
 
 USERS = 4

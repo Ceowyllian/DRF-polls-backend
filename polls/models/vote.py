@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from . import Choice
@@ -23,3 +24,7 @@ class Vote(models.Model):
             models.UniqueConstraint(name='single_vote_for_question',
                                     fields=['question', 'voted_by']),
         ]
+
+    def clean(self):
+        if self.question != self.choice.question:
+            raise ValidationError('Choice is not related to question.')
