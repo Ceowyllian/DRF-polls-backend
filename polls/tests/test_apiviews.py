@@ -6,6 +6,8 @@ from rest_framework import status
 from polls.models import Choice
 from polls.models import Question
 from utils.test.endpoint_testcase import BaseAPITestCase
+from . import fixtures
+from .fixtures import C, Q
 
 User = get_user_model()
 
@@ -38,28 +40,19 @@ class TestQuestionCreate(BaseAPITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.uri = '/polls/questions/'
-
-        cls.valid_question = {
-            'question_title': 'test question',
-            'question_text': 'test question text',
-            'choices': [
-                {'choice_text': 'option 1'},
-                {'choice_text': 'option 2'},
-                {'choice_text': 'option 3'},
-            ]
-        }
-
         cls.user, cls.token = cls.create_user_with_token(
             username='keyandran',
             email='delmer_southwickao@stakeholders.bnh'
         )
 
     def test_201_created_successfully(self):
+        question = fixtures.question_with_choices()
+
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps(self.valid_question)
+            data=json.dumps(question)
         )
 
         self.assert_status_code_equals(
@@ -67,19 +60,20 @@ class TestQuestionCreate(BaseAPITestCase):
         )
 
     def test_400_cannot_create_invalid_question(self):
-        invalid_question = {
-            'question_title': '',
-            'question_text': '',
-            'choices': [
-                {'choice_text': 'option 1'},
-            ]
-        }
+        question = fixtures.question_with_choices(
+            title=Q.title.too_short(),
+            text=Q.text.too_long(),
+            choices=fixtures.choice_list(
+                number=C.number.too_many(),
+                text=C.text.too_long()
+            )
+        )
 
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps(invalid_question)
+            data=json.dumps(question)
         )
 
         self.assert_status_code_equals(
@@ -87,11 +81,13 @@ class TestQuestionCreate(BaseAPITestCase):
         )
 
     def test_401_cannot_create_unauthorized(self):
+        question = fixtures.question_with_choices()
+
         self.client.credentials()
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps(self.valid_question)
+            data=json.dumps(question)
         )
         self.assert_status_code_equals(
             response.status_code, status.HTTP_401_UNAUTHORIZED
@@ -111,8 +107,7 @@ class TestQuestionRetrieve(BaseAPITestCase):
             email='iraida_descoteauxtwt9@furnishings.if'
         )
         question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text',
+            **fixtures.question(),
             created_by=user
         )
         cls.uri = f'/polls/questions/{question.pk}/'
@@ -148,18 +143,14 @@ class TestQuestionUpdate(BaseAPITestCase):
         )
         cls.user, cls.token = user, token
         question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text',
+            **fixtures.question(),
             created_by=user
         )
         cls.question = question
         cls.uri = f'/polls/questions/{question.pk}/'
 
     def test_200_updated_successfully(self):
-        updated_fields = {
-            'question_title': 'Another title',
-            'question_text': 'Another text',
-        }
+        updated_fields = fixtures.question()
 
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.patch(
@@ -173,10 +164,10 @@ class TestQuestionUpdate(BaseAPITestCase):
         )
 
     def test_400_invalid_question_fields(self):
-        updated_fields = {
-            'question_title': '',
-            'question_text': '',
-        }
+        updated_fields = fixtures.question(
+            title=Q.title.too_long(),
+            text=Q.text.too_short()
+        )
 
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.patch(
@@ -190,10 +181,7 @@ class TestQuestionUpdate(BaseAPITestCase):
         )
 
     def test_401_cannot_update_unauthorized(self):
-        updated_fields = {
-            'question_title': 'Another title',
-            'question_text': 'Another text',
-        }
+        updated_fields = fixtures.question()
 
         self.client.credentials()
         response = self.client.patch(
@@ -211,10 +199,7 @@ class TestQuestionUpdate(BaseAPITestCase):
             username='shameriat5uz',
             email='pheng_spanndicc@curve.rln',
         )
-        updated_fields = {
-            'question_title': 'Another title',
-            'question_text': 'Another text',
-        }
+        updated_fields = fixtures.question()
 
         self.client.credentials(HTTP_AUTHORIZATION=another_token)
         response = self.client.patch(
@@ -242,8 +227,7 @@ class TestQuestionDelete(BaseAPITestCase):
         )
         cls.user, cls.token = user, token
         question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text',
+            **fixtures.question(),
             created_by=user
         )
         cls.question = question
@@ -306,8 +290,7 @@ class TestVoteCreate(BaseAPITestCase):
             email='adams_strumsbs@spare.ll'
         )
         question = Question.objects.create(
-            question_title='Test question title',
-            question_text='Test question text',
+            **fixtures.question(),
             created_by=user
         )
         choice_1 = Choice.objects.create(
@@ -328,7 +311,7 @@ class TestVoteCreate(BaseAPITestCase):
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps({'choice': self.choice_1.pk})
+            data=json.dumps({'choice_pk': self.choice_1.pk})
         )
 
         self.assert_status_code_equals(
@@ -340,7 +323,7 @@ class TestVoteCreate(BaseAPITestCase):
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps({'choice': self.choice_1.pk})
+            data=json.dumps({'choice_pk': self.choice_1.pk})
         )
 
         self.assert_status_code_equals(
@@ -352,7 +335,7 @@ class TestVoteCreate(BaseAPITestCase):
         kwargs = {
             'path': self.uri,
             'content_type': 'application/json',
-            'data': json.dumps({'choice': self.choice_1.pk})
+            'data': json.dumps({'choice_pk': self.choice_1.pk})
         }
         response_vote_1 = self.client.post(**kwargs)
         response_vote_2 = self.client.post(**kwargs)
@@ -374,11 +357,11 @@ class TestVoteCreate(BaseAPITestCase):
         }
         response_vote_1 = self.client.post(
             **kwargs,
-            data=json.dumps({'choice': self.choice_1.pk})
+            data=json.dumps({'choice_pk': self.choice_1.pk})
         )
         response_vote_2 = self.client.post(
             **kwargs,
-            data=json.dumps({'choice': self.choice_2.pk})
+            data=json.dumps({'choice_pk': self.choice_2.pk})
         )
 
         self.assert_status_code_equals(
@@ -396,7 +379,7 @@ class TestVoteCreate(BaseAPITestCase):
         response = self.client.post(
             path=self.uri,
             content_type='application/json',
-            data=json.dumps({'choice': 'blablabla'})
+            data=json.dumps({'choice_pk': 'blablabla'})
         )
 
         self.assert_status_code_equals(
