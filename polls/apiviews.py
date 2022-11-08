@@ -24,10 +24,7 @@ class QuestionListCreateAPI(views.APIView):
     def post(self, request, *args, **kwargs):
         input = serializers.QuestionCreateSerializer(data=request.data)
         input.is_valid(raise_exception=True)
-        question = services.question.create(
-            **input.validated_data,
-            created_by=request.user
-        )
+        question = services.question.create(created_by=request.user, **input.validated_data)
         output = serializers.QuestionDetailSerializer(instance=question)
         return Response(data=output.data, status=status.HTTP_201_CREATED)
 

@@ -11,7 +11,7 @@ class ChoiceConfig:
 
 
 class Choice(models.Model):
-    choice_text = models.CharField(
+    text = models.CharField(
         max_length=ChoiceConfig.TEXT_MAX_LEN,
         validators=[
             MaxLengthValidator(
@@ -28,8 +28,8 @@ class Choice(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(name='no identical choices for question',
-                             fields=['choice_text', 'question']),
+                             fields=['text', 'question']),
         ]
 
     def __str__(self):
-        return self.choice_text
+        return self.text

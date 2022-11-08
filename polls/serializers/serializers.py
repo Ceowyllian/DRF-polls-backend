@@ -28,7 +28,7 @@ class QuestionDetailSerializer(ReadOnlyModelSerializer):
     class ChoiceSerializer(serializers.ModelSerializer):
         class Meta:
             model = Choice
-            fields = ['choice_text']
+            fields = ['text']
 
     choices = ChoiceSerializer(many=True, required=True)
 
@@ -36,13 +36,13 @@ class QuestionDetailSerializer(ReadOnlyModelSerializer):
 class QuestionListSerializer(ReadOnlyModelSerializer):
     class Meta:
         model = Question
-        exclude = ['question_text']
+        exclude = ['text']
 
 
 class QuestionCreateSerializer(ReadOnlyModelSerializer):
     class Meta:
         model = Question
-        fields = ['question_title', 'question_text', 'choices']
+        fields = ['title', 'text', 'choices']
 
     choices = serializers.ListSerializer(
         child=serializers.CharField(
@@ -55,7 +55,7 @@ class QuestionCreateSerializer(ReadOnlyModelSerializer):
 class QuestionUpdateSerializer(ReadOnlyModelSerializer):
     class Meta:
         model = Question
-        fields = ['question_title', 'question_text']
+        fields = ['title', 'text']
 
 
 class VoteCreateSerializer(serializers.Serializer):

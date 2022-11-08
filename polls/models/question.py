@@ -16,7 +16,7 @@ class QuestionConfig:
 
 
 class Question(models.Model):
-    question_title = models.CharField(
+    title = models.CharField(
         max_length=QuestionConfig.TITLE_MAX_LEN,
         validators=[
             MinLengthValidator(
@@ -31,7 +31,7 @@ class Question(models.Model):
             ),
         ]
     )
-    question_text = models.CharField(
+    text = models.CharField(
         max_length=QuestionConfig.TEXT_MAX_LEN,
         validators=[
             MinLengthValidator(
@@ -54,7 +54,7 @@ class Question(models.Model):
     )
 
     def __str__(self):
-        return self.question_text
+        return self.text
 
     def choices(self):
         return self.choice_set.all()
