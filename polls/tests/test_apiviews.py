@@ -294,11 +294,11 @@ class TestVoteCreate(BaseAPITestCase):
             created_by=user
         )
         choice_1 = Choice.objects.create(
-            choice_text='Choice 1',
+            text='Choice 1',
             question=question
         )
         choice_2 = Choice.objects.create(
-            choice_text='Choice 2',
+            text='Choice 2',
             question=question
         )
         cls.token = token

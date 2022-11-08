@@ -86,8 +86,8 @@ def question(
         text=Q.text.valid(),
 ):
     return {
-        'question_title': title,
-        'question_text': text,
+        'title': title,
+        'text': text,
     }
 
 
@@ -98,7 +98,7 @@ def question_with_choices(
 ):
     choices_value = choices if choices is not None else choice_list()
     return {
-        'question_title': title,
-        'question_text': text,
+        'title': title,
+        'text': text,
         'choices': choices_value
     }

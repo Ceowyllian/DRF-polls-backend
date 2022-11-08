@@ -23,10 +23,7 @@ class TestCreateQuestionInstance(TestCase):
     def test_created_successfully(self):
         question_data = fixtures.question()
 
-        question = services.question.create_question_instance(
-            **question_data,
-            created_by=self.user
-        )
+        question = services.question.create_question_instance(created_by=self.user, **question_data)
 
         for field, value in question_data.items():
             self.assertEquals(getattr(question, field), value)
@@ -57,9 +54,7 @@ class TestCreateQuestionInstance(TestCase):
 
     def unable_to_create(self, **kwargs):
         with self.assertRaises(ValidationError):
-            services.question.create_question_instance(
-                **kwargs, created_by=self.user
-            )
+            services.question.create_question_instance(created_by=self.user, **kwargs)
 
 
 class TestCreateChoiceInstances(TestCase):
@@ -86,7 +81,7 @@ class TestCreateChoiceInstances(TestCase):
 
         self.assertEquals(len(instances), len(choices))
         for choice in instances:
-            self.assertIn(choice.choice_text, choices)
+            self.assertIn(choice.text, choices)
 
     def test_fail_too_many_choices(self):
         choices = fixtures.choice_list(number=C.number.too_many())
@@ -179,7 +174,7 @@ class TestQuestionRetrieve(TestCase):
             created_by=cls.user
         )
         cls.choices = [
-            Choice.objects.create(choice_text=text, question=cls.question)
+            Choice.objects.create(text=text, question=cls.question)
             for text in fixtures.choice_list()
         ]
 

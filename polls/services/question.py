@@ -25,7 +25,7 @@ def update(question_pk: int, updated_by: Any, data: Dict[str, Any]) -> Question:
 
     question, has_updated = model_update(
         instance=question,
-        fields=['question_title', 'question_text'],
+        fields=['title', 'text'],
         data=data
     )
     return question
@@ -38,10 +38,10 @@ def destroy(question_pk: int, destroyed_by: Any):
     question.delete()
 
 
-def create_question_instance(question_title: str, question_text: str, created_by: Any) -> Question:
+def create_question_instance(title: str, text: str, created_by: Any) -> Question:
     question = Question(
-        question_title=question_title,
-        question_text=question_text,
+        title=title,
+        text=text,
         created_by=created_by
     )
     question.full_clean()
@@ -62,14 +62,14 @@ def create_choice_instances(choices: List[str], question: Question) -> List[Choi
         )
     if number > len(set(choices)):
         raise ValidationError('The choices must be different.')
-    instances = [Choice(choice_text=text, question=question) for text in choices]
+    instances = [Choice(text=text, question=question) for text in choices]
     for instance in instances:
         instance.full_clean(validate_unique=False, validate_constraints=False)
     return instances
 
 
-def create(question_title: str, question_text: str, created_by: Any, choices: List[str]) -> Question:
-    question = create_question_instance(question_title, question_text, created_by)
+def create(title: str, text: str, created_by: Any, choices: List[str]) -> Question:
+    question = create_question_instance(title, text, created_by)
     with transaction.atomic():
         question.save()
         choice_instances = create_choice_instances(choices=choices, question=question)
