@@ -3,11 +3,11 @@ from django.urls import path
 from .apiviews import (
     QuestionListCreateAPI,
     QuestionRetrieveUpdateDeleteAPI,
-    VoteView,
+    VoteCreateAPI,
 )
 
 urlpatterns = [
     path('questions/', QuestionListCreateAPI.as_view()),
     path('questions/<int:pk>/', QuestionRetrieveUpdateDeleteAPI.as_view()),
-    path('votes/', VoteView.as_view(), name='vote'),
+    path('votes/', VoteCreateAPI.as_view(), name='vote'),
 ]

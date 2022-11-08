@@ -1,11 +1,11 @@
 from django.http import Http404
-from rest_framework import generics, status
 from rest_framework import permissions
-from rest_framework import views
+from rest_framework import status
 from rest_framework.response import Response
 
 from . import serializers, services
 from .models import Question
+from utils import views
 
 
 class QuestionListCreateAPI(views.APIView):
@@ -77,14 +77,18 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
     def handle_exception(self, exc):
         if isinstance(exc, Question.DoesNotExist):
             raise Http404
-        return super(QuestionRetrieveUpdateDeleteAPI, self).handle_exception(exc)
+        return super().handle_exception(exc)
 
 
-class VoteView(generics.CreateAPIView):
-    serializer_class = serializers.VoteSerializer
+class VoteCreateAPI(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, ]
 
-    def perform_create(self, serializer):
-        services.vote.perform_vote(
-            **serializer.validated_data,
-            voted_by=self.request.user
+    def post(self, request, *args, **kwargs):
+        input = serializers.VoteCreateSerializer(data=request.data)
+        input.is_valid(raise_exception=True)
+        vote = services.vote.perform_vote(
+            **input.validated_data,
+            voted_by=request.user
         )
+        output = serializers.VoteOutputSerializer(instance=vote)
+        return Response(data=output.data, status=status.HTTP_201_CREATED)
