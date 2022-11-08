@@ -4,6 +4,7 @@ from polls.models import (
     Question,
     Choice,
     ChoiceConfig,
+    Vote,
 )
 
 
@@ -57,5 +58,11 @@ class QuestionUpdateSerializer(ReadOnlyModelSerializer):
         fields = ['question_title', 'question_text']
 
 
-class VoteSerializer(serializers.Serializer):
+class VoteCreateSerializer(serializers.Serializer):
     choice_pk = serializers.IntegerField(min_value=1, required=True)
+
+
+class VoteOutputSerializer(ReadOnlyModelSerializer):
+    class Meta:
+        model = Vote
+        fields = '__all__'

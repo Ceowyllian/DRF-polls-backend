@@ -5,7 +5,7 @@ from rest_framework import status
 
 from polls.models import Choice
 from polls.models import Question
-from utils.test.endpoint_testcase import BaseAPITestCase
+from utils.test import BaseAPITestCase
 from . import fixtures
 from .fixtures import C, Q
 

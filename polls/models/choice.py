@@ -22,7 +22,7 @@ class Choice(models.Model):
         ]
     )
 
-    from . import Question
+    from .question import Question
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     class Meta:

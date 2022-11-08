@@ -1,5 +1,6 @@
 from .serializers import (
-    VoteSerializer,
+    VoteCreateSerializer,
+    VoteOutputSerializer,
     QuestionUpdateSerializer,
     QuestionCreateSerializer,
     QuestionDetailSerializer,
