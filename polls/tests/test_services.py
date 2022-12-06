@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.test import TestCase
@@ -190,3 +192,109 @@ class TestQuestionRetrieve(TestCase):
 
         with self.assertRaises(Question.DoesNotExist):
             question = services.question.retrieve(question_pk=question_pk)
+
+
+class TestQuestionList(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username='test_user',
+            password='3pD5oykYb2sUIZWYMje',
+            email='archibald_moreltaq@cups.ws'
+        )
+
+    def test_filter_by_created_by(self):
+        amount = 3
+        for _ in range(amount):
+            Question.objects.create(
+                **fixtures.question(),
+                created_by=self.user
+            )
+
+        queryset = services.question.question_list(
+            filters={'created_by': self.user.username}
+        )
+
+        for question in queryset:
+            self.assertEquals(
+                question.created_by,
+                self.user
+            )
+        self.assertEquals(len(queryset), amount)
+
+    def test_filter_by_title(self):
+        q1 = Question.objects.create(
+            title='aaaaaaaaaaaa',
+            text='aaaaaaaaaaaa',
+            created_by=self.user
+        )
+        q2 = Question.objects.create(
+            title='bbbbbbbbbbb',
+            text='bbbbbbbbbbb',
+            created_by=self.user
+        )
+
+        queryset = services.question.question_list(
+            filters={'title': 'aaaa'}
+        )
+
+        self.assertIn(q1, queryset)
+        self.assertNotIn(q2, queryset)
+
+    def test_filter_by_text(self):
+        q1 = Question.objects.create(
+            title='aaaaaaaaaaaa',
+            text='aaaaaaaaaaaa',
+            created_by=self.user
+        )
+        q2 = Question.objects.create(
+            title='bbbbbbbbbbb',
+            text='bbbbbbbbbbb',
+            created_by=self.user
+        )
+
+        queryset = services.question.question_list(
+            filters={'text': 'aaaa'}
+        )
+
+        self.assertIn(q1, queryset)
+        self.assertNotIn(q2, queryset)
+
+    def test_filter_by_date_before(self):
+        q1 = Question.objects.create(
+            **fixtures.question(),
+            created_by=self.user,
+            pub_date=datetime(year=2022, month=12, day=4)
+        )
+        q2 = Question.objects.create(
+            **fixtures.question(),
+            created_by=self.user,
+            pub_date=datetime(year=2022, month=12, day=10)
+        )
+
+        queryset = services.question.question_list(
+            filters={'date_before': '2022-12-9'}
+        )
+
+        self.assertIn(q1, queryset)
+        self.assertNotIn(q2, queryset)
+
+    def test_filter_by_date_after(self):
+        q1 = Question.objects.create(
+            **fixtures.question(),
+            created_by=self.user,
+            pub_date=datetime(year=2022, month=12, day=4)
+        )
+        q2 = Question.objects.create(
+            **fixtures.question(),
+            created_by=self.user,
+            pub_date=datetime(year=2022, month=12, day=10)
+        )
+
+        queryset = services.question.question_list(
+            filters={'date_after': '2022-12-5'}
+        )
+
+        self.assertIn(q2, queryset)
+        self.assertNotIn(q1, queryset)
