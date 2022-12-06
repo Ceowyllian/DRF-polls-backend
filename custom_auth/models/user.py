@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class CustomUsernameValidator(ASCIIUsernameValidator):
+class UsernameValidator(ASCIIUsernameValidator):
     regex = r'^[\w.-]+\Z'
     message = _(
         'Enter a valid username. This value may contain only English letters, '
@@ -17,7 +17,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    username_validator = CustomUsernameValidator
+    username_validator = UsernameValidator
 
     class Meta(AbstractUser.Meta):
         abstract = False
