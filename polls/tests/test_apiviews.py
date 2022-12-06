@@ -21,6 +21,14 @@ class TestQuestionList(BaseAPITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.uri = '/polls/questions/'
+        user, token = cls.create_user_with_token(
+            'malihaae6x', 'hindy_mauricec1@equipped.twv'
+        )
+        questions = [
+            Question(**fixtures.question(), created_by=user)
+            for _ in range(5)
+        ]
+        Question.objects.bulk_create(questions)
 
     def test_200_questions_exist(self):
         self.client.credentials()

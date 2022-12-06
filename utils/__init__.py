@@ -1,1 +1,6 @@
-from . import services, views, test
+from . import (
+    services,
+    views,
+    test,
+    serializers,
+)

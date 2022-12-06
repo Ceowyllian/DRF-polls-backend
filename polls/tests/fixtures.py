@@ -1,3 +1,11 @@
+__all__ = (
+    'Q',
+    'C',
+    'choice_list',
+    'question',
+    'question_with_choices',
+)
+
 from django.utils.crypto import get_random_string
 
 from ..models import (
@@ -40,15 +48,15 @@ class C:
     class number:
         @staticmethod
         def valid():
-            return QuestionConfig.CHOICES_MAX_NUMBER
+            return ChoiceConfig.CHOICES_MAX_NUMBER
 
         @staticmethod
         def too_many():
-            return QuestionConfig.CHOICES_MAX_NUMBER + 1
+            return ChoiceConfig.CHOICES_MAX_NUMBER + 1
 
         @staticmethod
         def too_few():
-            return QuestionConfig.CHOICES_MIN_NUMBER - 1
+            return ChoiceConfig.CHOICES_MIN_NUMBER - 1
 
     class text:
         @staticmethod
@@ -77,28 +85,28 @@ class C:
                 yield text
 
 
-def choice_list(number=C.number.valid(), text=C.text.valid()):
+def get_default(value, default):
+    return default if value is None else value
+
+
+def choice_list(number=None, text=None):
+    number = get_default(number, C.number.valid())
+    text = get_default(text, C.text.valid())
     return [next(text) for _ in range(number)]
 
 
-def question(
-        title=Q.title.valid(),
-        text=Q.text.valid(),
-):
+def question(title=None, text=None):
+    title = get_default(title, Q.title.valid())
+    text = get_default(text, Q.text.valid())
     return {
         'title': title,
         'text': text,
     }
 
 
-def question_with_choices(
-        title=Q.title.valid(),
-        text=Q.text.valid(),
-        choices=None
-):
-    choices_value = choices if choices is not None else choice_list()
+def question_with_choices(title=None, text=None, choices=None):
+    choices = get_default(choices, choice_list())
     return {
-        'title': title,
-        'text': text,
-        'choices': choices_value
+        **question(title=title, text=text),
+        'choices': choices
     }

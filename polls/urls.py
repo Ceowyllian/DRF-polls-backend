@@ -8,6 +8,6 @@ from .apiviews import (
 
 urlpatterns = [
     path('questions/', QuestionListCreateAPI.as_view()),
-    path('questions/<int:pk>/', QuestionRetrieveUpdateDeleteAPI.as_view()),
+    path('questions/<int:pk>/', QuestionRetrieveUpdateDeleteAPI.as_view(), name='question-detail'),
     path('votes/', VoteCreateAPI.as_view(), name='vote'),
 ]
