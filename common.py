@@ -1,5 +1,7 @@
 from typing import TypeVar
 
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-DjangoModelType = TypeVar('DjangoModelType', bound=models.Model)
+ModelType = TypeVar('ModelType', bound=models.Model)
+UserModelType = TypeVar('UserModelType', bound=AbstractUser)
