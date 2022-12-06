@@ -1,68 +1,72 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from common import UserModelType
 from polls.models import (
     Question,
-    Choice,
-    ChoiceConfig,
     Vote,
 )
+from utils.serializers import ModelSerializer, HyperlinkedModelSerializer
+
+User: UserModelType = get_user_model()
 
 
-class ReadOnlyModelSerializer(serializers.ModelSerializer):
-
-    def save(self, **kwargs):
-        raise NotImplementedError
-
-    def create(self, validated_data):
-        raise NotImplementedError
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError
+class QuestionFilterSerializer(serializers.Serializer):
+    title = serializers.CharField(required=False)
+    text = serializers.CharField(required=False)
+    created_by = serializers.CharField(required=False)
+    date_before = serializers.DateField(required=False)
+    date_after = serializers.DateField(required=False)
 
 
-class QuestionDetailSerializer(ReadOnlyModelSerializer):
-    class Meta:
-        model = Question
-        fields = '__all__'
-
-    class ChoiceSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = Choice
-            fields = ['text']
-
-    choices = ChoiceSerializer(many=True, required=True)
-
-
-class QuestionListSerializer(ReadOnlyModelSerializer):
-    class Meta:
-        model = Question
-        exclude = ['text']
-
-
-class QuestionCreateSerializer(ReadOnlyModelSerializer):
-    class Meta:
-        model = Question
-        fields = ['title', 'text', 'choices']
-
+class QuestionCreateSerializer(serializers.Serializer):
+    title = serializers.CharField(required=True)
+    text = serializers.CharField(required=True)
     choices = serializers.ListSerializer(
-        child=serializers.CharField(
-            min_length=ChoiceConfig.TEXT_MIN_LEN,
-            max_length=ChoiceConfig.TEXT_MAX_LEN
-        ),
+        required=True,
+        child=serializers.CharField(),
     )
 
 
-class QuestionUpdateSerializer(ReadOnlyModelSerializer):
-    class Meta:
-        model = Question
-        fields = ['title', 'text']
+class QuestionUpdateSerializer(serializers.Serializer):
+    title = serializers.CharField(required=True)
+    text = serializers.CharField(required=True)
 
 
 class VoteCreateSerializer(serializers.Serializer):
-    choice_pk = serializers.IntegerField(min_value=1, required=True)
+    choice_pk = serializers.IntegerField(
+        min_value=1, required=True
+    )
 
 
-class VoteOutputSerializer(ReadOnlyModelSerializer):
+class QuestionDetailSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('url', 'title', 'text', 'created_by', 'pub_date', 'choices')
+        extra_kwargs = {
+            'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
+            'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
+        }
+
+    class ChoiceSerializer(serializers.Serializer):
+        pk = serializers.IntegerField()
+        text = serializers.CharField()
+        num_votes = serializers.IntegerField()
+
+    choices = ChoiceSerializer(many=True, source='choice_set')
+
+
+class QuestionListSerializer(HyperlinkedModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('url', 'title', 'created_by', 'pub_date')
+        extra_kwargs = {
+            'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
+            'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
+        }
+
+
+class VoteOutputSerializer(ModelSerializer):
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = ('voted_by', 'date_voted', 'question', 'choice')
