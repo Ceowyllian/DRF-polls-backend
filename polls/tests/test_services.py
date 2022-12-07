@@ -4,7 +4,11 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.test import TestCase
 
-from polls.models import Question, Choice
+from polls.models import (
+    Question,
+    Choice,
+    Vote,
+)
 from . import fixtures
 from .fixtures import Q, C
 from .. import services
@@ -298,3 +302,106 @@ class TestQuestionList(TestCase):
 
         self.assertIn(q2, queryset)
         self.assertNotIn(q1, queryset)
+
+
+class TestPerformVote(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username='test_user',
+            password='3pD5oykYb2sUIZWYMje',
+            email='archibald_moreltaq@cups.ws'
+        )
+        cls.question = Question.objects.create(
+            **fixtures.question(),
+            created_by=cls.user,
+        )
+        cls.choice_1 = Choice.objects.create(
+            text='foo',
+            question=cls.question
+        )
+        cls.choice_2 = Choice.objects.create(
+            text='bar',
+            question=cls.question
+        )
+
+    def test_perform_vote_successfully(self):
+        self.assertEqual(self.choice_1.vote_set.count(), 0)
+
+        services.vote.perform_vote(
+            choice_pk=self.choice_1.pk,
+            user=self.user
+        )
+
+        self.assertEqual(self.choice_1.vote_set.count(), 1)
+
+    def test_fail_to_vote_twice_for_the_same_choice(self):
+        Vote.objects.create(
+            voted_by=self.user,
+            question=self.question,
+            choice=self.choice_1,
+        )
+
+        with self.assertRaises(ValidationError):
+            services.vote.perform_vote(
+                choice_pk=self.choice_1.pk,
+                user=self.user
+            )
+
+    def test_fail_to_vote_twice_for_the_same_question(self):
+        Vote.objects.create(
+            voted_by=self.user,
+            question=self.question,
+            choice=self.choice_1,
+        )
+
+        with self.assertRaises(ValidationError):
+            services.vote.perform_vote(
+                choice_pk=self.choice_2.pk,
+                user=self.user
+            )
+
+
+class TestCancelVote(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username='test_user',
+            password='3pD5oykYb2sUIZWYMje',
+            email='archibald_moreltaq@cups.ws'
+        )
+        cls.question = Question.objects.create(
+            **fixtures.question(),
+            created_by=cls.user,
+        )
+        cls.choice = Choice.objects.create(
+            text='foo',
+            question=cls.question
+        )
+        cls.vote = Vote.objects.create(
+            voted_by=cls.user,
+            question=cls.question,
+            choice=cls.choice,
+        )
+
+    def test_cancel_vote_successfully(self):
+        self.assertEquals(self.choice.vote_set.count(), 1)
+
+        services.vote.cancel_vote(
+            choice_pk=self.choice.pk,
+            user=self.user
+        )
+
+        self.assertEquals(self.choice.vote_set.count(), 0)
+
+    def test_fail_user_did_not_vote(self):
+        self.vote.delete()
+        self.assertEquals(self.choice.vote_set.count(), 0)
+
+        with self.assertRaises(ValidationError):
+            services.vote.cancel_vote(
+                choice_pk=self.choice.pk,
+                user=self.user
+            )

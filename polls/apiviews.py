@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from utils import views
 from . import serializers, services
-from .models import Question
+from .models import Question, Choice
 from .pagination import LimitOffsetPagination, get_paginated_response
 
 
@@ -93,19 +93,26 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
 
     def handle_exception(self, exc):
         if isinstance(exc, Question.DoesNotExist):
-            raise Http404
+            raise Http404 from exc
         return super().handle_exception(exc)
 
 
-class VoteCreateAPI(views.APIView):
-    permission_classes = [permissions.IsAuthenticated, ]
+class VoteCreateDeleteAPI(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        input = serializers.VoteCreateSerializer(data=request.data)
-        input.is_valid(raise_exception=True)
-        vote = services.vote.perform_vote(
-            **input.validated_data,
-            voted_by=request.user
+        services.vote.perform_vote(
+            choice_pk=kwargs['pk'], user=request.user
         )
-        output = serializers.VoteOutputSerializer(instance=vote)
-        return Response(data=output.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        services.vote.cancel_vote(
+            choice_pk=kwargs['pk'], user=request.user
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def handle_exception(self, exc):
+        if isinstance(exc, Choice.DoesNotExist):
+            raise Http404 from exc
+        return super().handle_exception(exc)

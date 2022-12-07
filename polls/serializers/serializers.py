@@ -2,11 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from common import UserModelType
-from polls.models import (
-    Question,
-    Vote,
-)
-from utils.serializers import ModelSerializer, HyperlinkedModelSerializer
+from polls.models import Question
+from utils.serializers import HyperlinkedModelSerializer
 
 User: UserModelType = get_user_model()
 
@@ -51,7 +48,6 @@ class QuestionDetailSerializer(HyperlinkedModelSerializer):
     class ChoiceSerializer(serializers.Serializer):
         pk = serializers.IntegerField()
         text = serializers.CharField()
-        num_votes = serializers.IntegerField()
 
     choices = ChoiceSerializer(many=True, source='choice_set')
 
@@ -64,9 +60,3 @@ class QuestionListSerializer(HyperlinkedModelSerializer):
             'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
             'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
         }
-
-
-class VoteOutputSerializer(ModelSerializer):
-    class Meta:
-        model = Vote
-        fields = ('voted_by', 'date_voted', 'question', 'choice')

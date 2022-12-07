@@ -3,7 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
-from polls.models import Choice
+from polls.models import Choice, Vote
 from polls.models import Question
 from utils.test import BaseAPITestCase
 from . import fixtures
@@ -15,6 +15,7 @@ User = get_user_model()
 class TestQuestionList(BaseAPITestCase):
     """
     GET /polls/questions/
+
     HTTP authorization is NOT required.
     """
 
@@ -34,7 +35,7 @@ class TestQuestionList(BaseAPITestCase):
         self.client.credentials()
         response = self.client.get(path=self.uri)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_200_OK
         )
 
@@ -42,6 +43,7 @@ class TestQuestionList(BaseAPITestCase):
 class TestQuestionCreate(BaseAPITestCase):
     """
     POST /polls/questions/
+
     HTTP authorization IS required.
     """
 
@@ -63,7 +65,7 @@ class TestQuestionCreate(BaseAPITestCase):
             data=json.dumps(question)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_201_CREATED
         )
 
@@ -84,7 +86,7 @@ class TestQuestionCreate(BaseAPITestCase):
             data=json.dumps(question)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_400_BAD_REQUEST
         )
 
@@ -97,7 +99,7 @@ class TestQuestionCreate(BaseAPITestCase):
             content_type='application/json',
             data=json.dumps(question)
         )
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_401_UNAUTHORIZED
         )
 
@@ -105,6 +107,7 @@ class TestQuestionCreate(BaseAPITestCase):
 class TestQuestionRetrieve(BaseAPITestCase):
     """
     GET /polls/questions/{id}
+
     HTTP authorization is NOT required.
     """
 
@@ -124,7 +127,7 @@ class TestQuestionRetrieve(BaseAPITestCase):
         self.client.credentials()
         response = self.client.get(path=self.uri)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_200_OK
         )
 
@@ -132,7 +135,7 @@ class TestQuestionRetrieve(BaseAPITestCase):
         self.client.credentials()
         response = self.client.get(path='/polls/questions/0/')
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_404_NOT_FOUND
         )
 
@@ -140,6 +143,7 @@ class TestQuestionRetrieve(BaseAPITestCase):
 class TestQuestionUpdate(BaseAPITestCase):
     """
     PATCH /polls/questions/{id}
+
     HTTP authorization IS required.
     """
 
@@ -167,7 +171,7 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_200_OK
         )
 
@@ -184,7 +188,7 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_400_BAD_REQUEST
         )
 
@@ -198,7 +202,7 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_401_UNAUTHORIZED
         )
 
@@ -216,7 +220,7 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields)
         )
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_403_FORBIDDEN
         )
 
@@ -224,6 +228,7 @@ class TestQuestionUpdate(BaseAPITestCase):
 class TestQuestionDelete(BaseAPITestCase):
     """
     DELETE /polls/question/{id}
+
     HTTP authorization IS required.
     """
 
@@ -246,11 +251,11 @@ class TestQuestionDelete(BaseAPITestCase):
         response_delete = self.client.delete(self.uri)
         response_retrieve = self.client.get(self.uri)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response_delete.status_code,
             status.HTTP_204_NO_CONTENT
         )
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response_retrieve.status_code,
             status.HTTP_404_NOT_FOUND
         )
@@ -259,7 +264,7 @@ class TestQuestionDelete(BaseAPITestCase):
         self.client.credentials()
         response = self.client.delete(self.uri)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_401_UNAUTHORIZED
         )
 
@@ -272,7 +277,7 @@ class TestQuestionDelete(BaseAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=another_token)
         response = self.client.delete(self.uri)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_403_FORBIDDEN
         )
 
@@ -280,20 +285,19 @@ class TestQuestionDelete(BaseAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.delete('/polls/questions/0/')
 
-        self.assert_status_code_equals(
-            response.status_code, status.HTTP_404_NOT_FOUND
-        )
+        self.assert_status_codes_equal(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class TestVoteCreate(BaseAPITestCase):
     """
-    POST /polls/votes/
+    POST /polls/votes/{id}
+
     HTTP authorization IS required.
     """
 
     @classmethod
     def setUpTestData(cls):
-        user, token = cls.create_user_with_token(
+        user, cls.token = cls.create_user_with_token(
             username='krystatk',
             email='adams_strumsbs@spare.ll'
         )
@@ -309,87 +313,120 @@ class TestVoteCreate(BaseAPITestCase):
             text='Choice 2',
             question=question
         )
-        cls.token = token
-        cls.choice_1 = choice_1
-        cls.choice_2 = choice_2
-        cls.uri = '/polls/votes/'
+        cls.uri_choice_1 = '/polls/votes/%s/' % choice_1.pk
+        cls.uri_choice_2 = '/polls/votes/%s/' % choice_2.pk
 
     def test_201_vote_successfully(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
-        response = self.client.post(
-            path=self.uri,
-            content_type='application/json',
-            data=json.dumps({'choice_pk': self.choice_1.pk})
-        )
+        response = self.client.post(path=self.uri_choice_1)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_201_CREATED
         )
 
     def test_401_cannot_vote_unauthorized(self):
         self.client.credentials()
-        response = self.client.post(
-            path=self.uri,
-            content_type='application/json',
-            data=json.dumps({'choice_pk': self.choice_1.pk})
-        )
+        response = self.client.post(path=self.uri_choice_1)
 
-        self.assert_status_code_equals(
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_401_UNAUTHORIZED
         )
 
     def test_400_cannot_vote_twice_for_the_same_choice(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
-        kwargs = {
-            'path': self.uri,
-            'content_type': 'application/json',
-            'data': json.dumps({'choice_pk': self.choice_1.pk})
-        }
-        response_vote_1 = self.client.post(**kwargs)
-        response_vote_2 = self.client.post(**kwargs)
+        response_vote_first = self.client.post(path=self.uri_choice_1)
+        response_vote_again = self.client.post(path=self.uri_choice_1)
 
-        self.assert_status_code_equals(
-            response_vote_1.status_code,
+        self.assert_status_codes_equal(
+            response_vote_first.status_code,
             status.HTTP_201_CREATED
         )
-        self.assert_status_code_equals(
-            response_vote_2.status_code,
+        self.assert_status_codes_equal(
+            response_vote_again.status_code,
             status.HTTP_400_BAD_REQUEST
         )
 
     def test_400_cannot_vote_twice_for_the_same_question(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
-        kwargs = {
-            'path': self.uri,
-            'content_type': 'application/json',
-        }
-        response_vote_1 = self.client.post(
-            **kwargs,
-            data=json.dumps({'choice_pk': self.choice_1.pk})
-        )
-        response_vote_2 = self.client.post(
-            **kwargs,
-            data=json.dumps({'choice_pk': self.choice_2.pk})
-        )
+        response_vote_first = self.client.post(path=self.uri_choice_1)
+        response_vote_again = self.client.post(path=self.uri_choice_2)
 
-        self.assert_status_code_equals(
-            response_vote_1.status_code,
+        self.assert_status_codes_equal(
+            response_vote_first.status_code,
             status.HTTP_201_CREATED
         )
-        self.assert_status_code_equals(
-            response_vote_2.status_code,
+        self.assert_status_codes_equal(
+            response_vote_again.status_code,
             status.HTTP_400_BAD_REQUEST
         )
 
-    def test_400_cannot_vote_choice_does_not_exist(self):
+    def test_404_cannot_vote_choice_does_not_exist(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.post(path='/polls/votes/0/')
 
-        response = self.client.post(
-            path=self.uri,
-            content_type='application/json',
-            data=json.dumps({'choice_pk': 'blablabla'})
+        self.assert_status_codes_equal(
+            response.status_code, status.HTTP_404_NOT_FOUND
         )
 
-        self.assert_status_code_equals(
+
+class TestVoteDelete(BaseAPITestCase):
+    """
+    DELETE /polls/votes/{id}
+
+    HTTP authorization IS required.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        user, cls.token = cls.create_user_with_token(
+            username='krystatk',
+            email='adams_strumsbs@spare.ll'
+        )
+        question = Question.objects.create(
+            **fixtures.question(),
+            created_by=user
+        )
+        choice = Choice.objects.create(
+            text='Choice 1',
+            question=question
+        )
+        cls.vote = Vote.objects.create(
+            voted_by=user,
+            choice=choice,
+            question=question
+        )
+        cls.uri = f'/polls/votes/{choice.pk}/'
+
+    def test_204_cancel_vote_successfully(self):
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.delete(path=self.uri)
+
+        self.assert_status_codes_equal(
+            response.status_code, status.HTTP_204_NO_CONTENT
+        )
+
+    def test_401_cannot_cancel_vote_unauthorized(self):
+        self.client.credentials()
+        response = self.client.delete(path=self.uri)
+
+        self.assert_status_codes_equal(
+            response.status_code, status.HTTP_401_UNAUTHORIZED
+        )
+
+    def test_400_cannot_cancel_vote_user_did_not_vote(self):
+        self.vote.delete()
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.delete(path=self.uri)
+
+        self.assert_status_codes_equal(
             response.status_code, status.HTTP_400_BAD_REQUEST
+        )
+
+    def test_404_cannot_cancel_vote_choice_does_not_exist(self):
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.delete(path='/polls/votes/0/')
+
+        self.assert_status_codes_equal(
+            response.status_code, status.HTTP_404_NOT_FOUND
         )
