@@ -40,11 +40,7 @@ def retrieve(*, question_pk: int, fetch_choices: bool = False) -> Question:
     queryset = Question.objects.select_related('created_by')
 
     if fetch_choices:
-        choice_queryset = Choice.objects \
-            .annotate(num_votes=models.Count('vote'))
-        queryset = queryset.prefetch_related(
-            models.Prefetch('choice_set', queryset=choice_queryset)
-        )
+        queryset = queryset.prefetch_related('choice_set')
 
     return queryset.get(id=question_pk)
 
