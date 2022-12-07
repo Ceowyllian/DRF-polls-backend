@@ -19,7 +19,7 @@ class BaseAPITestCase(APITestCase):
         token = Token.objects.create(user=user)
         return user, f'Token {token.key}'
 
-    def assert_status_code_equals(self, received: int, expected: int):
+    def assert_status_codes_equal(self, received: int, expected: int):
         self.assertEqual(
             received, expected,
             'Expected HTTP response code {0}, received {1} instead.'
