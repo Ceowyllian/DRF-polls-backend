@@ -23,7 +23,8 @@ class Vote(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(name='single_vote_for_question',
-                                    fields=['question', 'voted_by']),
+                                    fields=['question', 'voted_by'],
+                                    violation_error_message="You can only vote once per poll."),
         ]
 
     def clean(self):
