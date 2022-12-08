@@ -14,10 +14,10 @@ class QuestionListCreateAPI(views.APIView):
         default_limit = 10
 
     def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        if self.request.method == 'POST':
+        method = self.request.method
+        if method == 'POST':
             return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
 
     def get(self, request, *args, **kwargs):
         filters_serializer = serializers.QuestionFilterSerializer(
@@ -48,10 +48,10 @@ class QuestionListCreateAPI(views.APIView):
 
 class QuestionRetrieveUpdateDeleteAPI(views.APIView):
     def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+        method = self.request.method
+        if method in ('PUT', 'PATCH', 'DELETE'):
             return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
 
     def get(self, request, *args, **kwargs):
         question = services.question.retrieve(
@@ -98,7 +98,12 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
 
 
 class VoteCreateDeleteAPI(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        method = self.request.method
+        if method in ('POST', 'DELETE'):
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
 
     def post(self, request, *args, **kwargs):
         services.vote.perform_vote(
