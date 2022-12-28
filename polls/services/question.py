@@ -17,9 +17,9 @@ User: UserModelType = get_user_model()
 
 
 class QuestionFilter(django_filters.FilterSet):
-    created_by = django_filters.ModelChoiceFilter(
-        queryset=User.objects.filter(is_active=True),
-        lookup_expr='username__iexact'
+    created_by = django_filters.CharFilter(
+        field_name='created_by__username',
+        lookup_expr='iexact'
     )
     title = django_filters.CharFilter(lookup_expr='icontains')
     text = django_filters.CharFilter(lookup_expr='icontains')
