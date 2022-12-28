@@ -39,7 +39,7 @@ class VoteCreateSerializer(serializers.Serializer):
 class QuestionDetailSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Question
-        fields = ('url', 'title', 'text', 'created_by', 'pub_date', 'choices')
+        fields = ('url', 'pk', 'title', 'text', 'created_by', 'pub_date', 'choices')
         extra_kwargs = {
             'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
             'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
@@ -55,7 +55,7 @@ class QuestionDetailSerializer(HyperlinkedModelSerializer):
 class QuestionListSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Question
-        fields = ('url', 'title', 'created_by', 'pub_date')
+        fields = ('url', 'pk', 'title', 'created_by', 'pub_date')
         extra_kwargs = {
             'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
             'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}

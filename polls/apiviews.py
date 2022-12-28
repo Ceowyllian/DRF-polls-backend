@@ -6,12 +6,10 @@ from rest_framework.response import Response
 from utils import views
 from . import serializers, services
 from .models import Question, Choice
-from .pagination import LimitOffsetPagination, get_paginated_response
+from .pagination import CursorPagination, get_paginated_response
 
 
 class QuestionListCreateAPI(views.APIView):
-    class Pagination(LimitOffsetPagination):
-        default_limit = 10
 
     def get_permissions(self):
         method = self.request.method
@@ -29,7 +27,7 @@ class QuestionListCreateAPI(views.APIView):
             filters=filters_serializer.validated_data
         )
         return get_paginated_response(
-            pagination_class=self.Pagination,
+            pagination_class=CursorPagination,
             serializer_class=serializers.QuestionListSerializer,
             queryset=questions,
             request=request,
