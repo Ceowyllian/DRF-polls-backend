@@ -203,67 +203,114 @@ class TestQuestionList(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='test_user',
-            password='3pD5oykYb2sUIZWYMje',
+            username='test_user', password='3pD5oykYb2s',
             email='archibald_moreltaq@cups.ws'
         )
 
     def test_filter_by_created_by(self):
-        amount = 3
-        for _ in range(amount):
-            Question.objects.create(
-                **fixtures.question(),
-                created_by=self.user
+
+        # Questions that MUST appear in the results
+        expected_questions = set()
+        for _ in range(3):
+            expected_questions.add(
+                Question.objects.create(
+                    created_by=self.user, **fixtures.question())
             )
 
-        queryset = services.question.question_list(
+        another_user = User.objects.create_user(
+            username='rakeshap', password='24dQdzXxH13a',
+            email='tawan_brayr@hiv.bxu'
+        )
+        # Questions that SHOULD NEVER appear in the results
+        unsuitable_questions = set()
+        for _ in range(5):
+            unsuitable_questions.add(
+                Question.objects.create(
+                    created_by=another_user, **fixtures.question())
+            )
+
+        results = services.question.question_list(
             filters={'created_by': self.user.username}
         )
 
-        for question in queryset:
-            self.assertEquals(
-                question.created_by,
-                self.user
-            )
-        self.assertEquals(len(queryset), amount)
+        self.assertEquals(len(results), len(expected_questions))
+
+        for question in results:
+            self.assertEquals(question.created_by, self.user)
+
+        for question in expected_questions:
+            self.assertIn(question, results)
+
+        for question in unsuitable_questions:
+            self.assertNotIn(question, results)
 
     def test_filter_by_title(self):
-        q1 = Question.objects.create(
-            title='aaaaaaaaaaaa',
-            text='aaaaaaaaaaaa',
-            created_by=self.user
-        )
-        q2 = Question.objects.create(
-            title='bbbbbbbbbbb',
-            text='bbbbbbbbbbb',
-            created_by=self.user
-        )
+        # Questions that MUST appear in the results
+        expected_questions = set()
+        for _ in range(5):
+            expected_questions.add(
+                Question.objects.create(
+                    title='aaaa', text='blablabla',
+                    created_by=self.user)
+            )
 
-        queryset = services.question.question_list(
+        # Questions that SHOULD NEVER appear in the results
+        unsuitable_questions = set()
+        for _ in range(5):
+            unsuitable_questions.add(
+                Question.objects.create(
+                    title='bbbb', text='blablabla',
+                    created_by=self.user)
+            )
+
+        results = services.question.question_list(
             filters={'title': 'aaaa'}
         )
 
-        self.assertIn(q1, queryset)
-        self.assertNotIn(q2, queryset)
+        self.assertEquals(len(results), len(expected_questions))
+
+        for question in results:
+            self.assertEquals(question.created_by, self.user)
+
+        for question in expected_questions:
+            self.assertIn(question, results)
+
+        for question in unsuitable_questions:
+            self.assertNotIn(question, results)
 
     def test_filter_by_text(self):
-        q1 = Question.objects.create(
-            title='aaaaaaaaaaaa',
-            text='aaaaaaaaaaaa',
-            created_by=self.user
-        )
-        q2 = Question.objects.create(
-            title='bbbbbbbbbbb',
-            text='bbbbbbbbbbb',
-            created_by=self.user
-        )
+        # Questions that MUST appear in the results
+        expected_questions = set()
+        for _ in range(5):
+            expected_questions.add(
+                Question.objects.create(
+                    title='blablabla', text='aaaa',
+                    created_by=self.user)
+            )
 
-        queryset = services.question.question_list(
+        # Questions that SHOULD NEVER appear in the results
+        unsuitable_questions = set()
+        for _ in range(5):
+            unsuitable_questions.add(
+                Question.objects.create(
+                    title='blablabla', text='bbbb',
+                    created_by=self.user)
+            )
+
+        results = services.question.question_list(
             filters={'text': 'aaaa'}
         )
 
-        self.assertIn(q1, queryset)
-        self.assertNotIn(q2, queryset)
+        self.assertEquals(len(results), len(expected_questions))
+
+        for question in results:
+            self.assertEquals(question.created_by, self.user)
+
+        for question in expected_questions:
+            self.assertIn(question, results)
+
+        for question in unsuitable_questions:
+            self.assertNotIn(question, results)
 
     def test_filter_by_date_before(self):
         q1 = Question.objects.create(
