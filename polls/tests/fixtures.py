@@ -1,9 +1,9 @@
 __all__ = (
-    'Q',
-    'C',
-    'choice_list',
-    'question',
-    'question_with_choices',
+    "Q",
+    "C",
+    "choice_list",
+    "question",
+    "question_with_choices",
 )
 
 from django.utils.crypto import get_random_string
@@ -16,7 +16,6 @@ from ..models import (
 
 class Q:
     class title:
-
         @staticmethod
         def valid():
             return get_random_string(QuestionConfig.TITLE_MAX_LEN)
@@ -30,7 +29,6 @@ class Q:
             return get_random_string(QuestionConfig.TITLE_MIN_LEN - 1)
 
     class text:
-
         @staticmethod
         def valid():
             return get_random_string(QuestionConfig.TEXT_MAX_LEN)
@@ -64,12 +62,14 @@ class C:
             i = 0
             while True:
                 i += 1
-                yield get_random_string(ChoiceConfig.TEXT_MAX_LEN - len(str(i))) + str(i)
+                yield get_random_string(ChoiceConfig.TEXT_MAX_LEN - len(str(i))) + str(
+                    i
+                )
 
         @staticmethod
         def empty():
             while True:
-                yield ''
+                yield ""
 
         @staticmethod
         def too_long():
@@ -99,14 +99,11 @@ def question(title=None, text=None):
     title = get_default(title, Q.title.valid())
     text = get_default(text, Q.text.valid())
     return {
-        'title': title,
-        'text': text,
+        "title": title,
+        "text": text,
     }
 
 
 def question_with_choices(title=None, text=None, choices=None):
     choices = get_default(choices, choice_list())
-    return {
-        **question(title=title, text=text),
-        'choices': choices
-    }
+    return {**question(title=title, text=text), "choices": choices}

@@ -2,11 +2,11 @@ import logging
 
 from django.contrib.auth import get_user_model
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import os
     import django
 
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'backend.settings'
+    os.environ["DJANGO_SETTINGS_MODULE"] = "backend.settings"
     django.setup()
 
 import warnings
@@ -34,10 +34,8 @@ VOTES = 20
 User = get_user_model()
 
 
-def random_ascii_string(
-        length: int,
-        alphabet=string.digits + string.ascii_letters):
-    return ''.join(random_choice(alphabet) for _ in range(length))
+def random_ascii_string(length: int, alphabet=string.digits + string.ascii_letters):
+    return "".join(random_choice(alphabet) for _ in range(length))
 
 
 def set_valid_user_passwords():
@@ -57,30 +55,38 @@ def run(seed=randint(0, 99999), supress_warnings=False, show_users=False):
     fake.add_provider(profile)
     seeder = Seed.seeder()
 
-    seeder.add_entity(User, USERS, {
-        'username': lambda x: random_ascii_string(12),
-        'password': lambda x: 'blank',
-        'is_superuser': lambda x: False,
-        'is_staff': lambda x: False,
-        'is_active': lambda x: True,
-    })
-    seeder.add_entity(Question, QUESTIONS, {
-        'pub_date': fake.date_time_between('-4d', 'now'),
-    })
+    seeder.add_entity(
+        User,
+        USERS,
+        {
+            "username": lambda x: random_ascii_string(12),
+            "password": lambda x: "blank",
+            "is_superuser": lambda x: False,
+            "is_staff": lambda x: False,
+            "is_active": lambda x: True,
+        },
+    )
+    seeder.add_entity(
+        Question,
+        QUESTIONS,
+        {
+            "pub_date": fake.date_time_between("-4d", "now"),
+        },
+    )
     seeder.add_entity(Choice, CHOICES)
 
     if supress_warnings:
         logger = logging.getLogger()
         logger.disabled = True
-        warnings.simplefilter('ignore')
+        warnings.simplefilter("ignore")
     seeder.execute()
 
     credentials = set_valid_user_passwords()
     if show_users:
-        print('Created users (username --- password):')
+        print("Created users (username --- password):")
         for username, password in credentials.items():
-            print(f'{username} --- {password}')
+            print(f"{username} --- {password}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run(supress_warnings=True)

@@ -5,7 +5,9 @@ from common import ModelType
 
 # Copied from
 # https://github.com/HackSoftware/Django-Styleguide-Example/blob/master/styleguide_example/common/services.py
-def model_update(instance: ModelType, fields: List[str], data: Dict[str, Any]) -> Tuple[ModelType, bool]:
+def model_update(
+    instance: ModelType, fields: List[str], data: Dict[str, Any]
+) -> Tuple[ModelType, bool]:
     """
     Generic update service meant to be reused in local update services.
     For example::
