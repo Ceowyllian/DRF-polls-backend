@@ -32,7 +32,9 @@ class TestQuestionList(BaseAPITestCase):
         self.client.credentials()
         response = self.client.get(path=self.uri)
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_200_OK)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_200_OK
+        )
 
 
 class TestQuestionCreate(BaseAPITestCase):
@@ -57,7 +59,9 @@ class TestQuestionCreate(BaseAPITestCase):
             path=self.uri, content_type="application/json", data=json.dumps(question)
         )
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_201_CREATED)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_201_CREATED
+        )
 
     def test_400_cannot_create_invalid_question(self):
         question = fixtures.question_with_choices(
@@ -74,7 +78,7 @@ class TestQuestionCreate(BaseAPITestCase):
         )
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_400_BAD_REQUEST
+            received=response.status_code, expected=status.HTTP_400_BAD_REQUEST
         )
 
     def test_401_cannot_create_unauthorized(self):
@@ -85,7 +89,7 @@ class TestQuestionCreate(BaseAPITestCase):
             path=self.uri, content_type="application/json", data=json.dumps(question)
         )
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
+            received=response.status_code, expected=status.HTTP_401_UNAUTHORIZED
         )
 
 
@@ -108,13 +112,17 @@ class TestQuestionRetrieve(BaseAPITestCase):
         self.client.credentials()
         response = self.client.get(path=self.uri)
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_200_OK)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_200_OK
+        )
 
     def test_404_non_existent_question(self):
         self.client.credentials()
         response = self.client.get(path="/polls/questions/0/")
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_404_NOT_FOUND
+        )
 
 
 class TestQuestionUpdate(BaseAPITestCase):
@@ -144,7 +152,9 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields),
         )
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_200_OK)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_200_OK
+        )
 
     def test_400_invalid_question_fields(self):
         updated_fields = fixtures.question(
@@ -159,7 +169,7 @@ class TestQuestionUpdate(BaseAPITestCase):
         )
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_400_BAD_REQUEST
+            received=response.status_code, expected=status.HTTP_400_BAD_REQUEST
         )
 
     def test_401_cannot_update_unauthorized(self):
@@ -173,7 +183,7 @@ class TestQuestionUpdate(BaseAPITestCase):
         )
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
+            received=response.status_code, expected=status.HTTP_401_UNAUTHORIZED
         )
 
     def test_403_cannot_update_someone_elses_question(self):
@@ -190,7 +200,9 @@ class TestQuestionUpdate(BaseAPITestCase):
             data=json.dumps(updated_fields),
         )
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_403_FORBIDDEN
+        )
 
 
 class TestQuestionDelete(BaseAPITestCase):
@@ -216,10 +228,10 @@ class TestQuestionDelete(BaseAPITestCase):
         response_retrieve = self.client.get(self.uri)
 
         self.assert_status_codes_equal(
-            response_delete.status_code, status.HTTP_204_NO_CONTENT
+            received=response_delete.status_code, expected=status.HTTP_204_NO_CONTENT
         )
         self.assert_status_codes_equal(
-            response_retrieve.status_code, status.HTTP_404_NOT_FOUND
+            received=response_retrieve.status_code, expected=status.HTTP_404_NOT_FOUND
         )
 
     def test_401_cannot_delete_unauthorized(self):
@@ -227,7 +239,7 @@ class TestQuestionDelete(BaseAPITestCase):
         response = self.client.delete(self.uri)
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
+            received=response.status_code, expected=status.HTTP_401_UNAUTHORIZED
         )
 
     def test_403_cannot_delete_someone_elses_question(self):
@@ -238,13 +250,17 @@ class TestQuestionDelete(BaseAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=another_token)
         response = self.client.delete(self.uri)
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_403_FORBIDDEN
+        )
 
     def test_404_cannot_delete_non_existent_question(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.delete("/polls/questions/0/")
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_404_NOT_FOUND
+        )
 
 
 class TestVoteCreate(BaseAPITestCase):
@@ -269,14 +285,16 @@ class TestVoteCreate(BaseAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.post(path=self.uri_choice_1)
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_201_CREATED)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_201_CREATED
+        )
 
     def test_401_cannot_vote_unauthorized(self):
         self.client.credentials()
         response = self.client.post(path=self.uri_choice_1)
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
+            received=response.status_code, expected=status.HTTP_401_UNAUTHORIZED
         )
 
     def test_400_cannot_vote_twice_for_the_same_choice(self):
@@ -285,10 +303,11 @@ class TestVoteCreate(BaseAPITestCase):
         response_vote_again = self.client.post(path=self.uri_choice_1)
 
         self.assert_status_codes_equal(
-            response_vote_first.status_code, status.HTTP_201_CREATED
+            received=response_vote_first.status_code, expected=status.HTTP_201_CREATED
         )
         self.assert_status_codes_equal(
-            response_vote_again.status_code, status.HTTP_400_BAD_REQUEST
+            received=response_vote_again.status_code,
+            expected=status.HTTP_400_BAD_REQUEST,
         )
 
     def test_400_cannot_vote_twice_for_the_same_question(self):
@@ -297,17 +316,20 @@ class TestVoteCreate(BaseAPITestCase):
         response_vote_again = self.client.post(path=self.uri_choice_2)
 
         self.assert_status_codes_equal(
-            response_vote_first.status_code, status.HTTP_201_CREATED
+            received=response_vote_first.status_code, expected=status.HTTP_201_CREATED
         )
         self.assert_status_codes_equal(
-            response_vote_again.status_code, status.HTTP_400_BAD_REQUEST
+            received=response_vote_again.status_code,
+            expected=status.HTTP_400_BAD_REQUEST,
         )
 
     def test_404_cannot_vote_choice_does_not_exist(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.post(path="/polls/votes/0/")
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_404_NOT_FOUND
+        )
 
 
 class TestVoteDelete(BaseAPITestCase):
@@ -331,14 +353,16 @@ class TestVoteDelete(BaseAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.delete(path=self.uri)
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_204_NO_CONTENT
+        )
 
     def test_401_cannot_cancel_vote_unauthorized(self):
         self.client.credentials()
         response = self.client.delete(path=self.uri)
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
+            received=response.status_code, expected=status.HTTP_401_UNAUTHORIZED
         )
 
     def test_400_cannot_cancel_vote_user_did_not_vote(self):
@@ -348,11 +372,13 @@ class TestVoteDelete(BaseAPITestCase):
         response = self.client.delete(path=self.uri)
 
         self.assert_status_codes_equal(
-            response.status_code, status.HTTP_400_BAD_REQUEST
+            received=response.status_code, expected=status.HTTP_400_BAD_REQUEST
         )
 
     def test_404_cannot_cancel_vote_choice_does_not_exist(self):
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.delete(path="/polls/votes/0/")
 
-        self.assert_status_codes_equal(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assert_status_codes_equal(
+            received=response.status_code, expected=status.HTTP_404_NOT_FOUND
+        )

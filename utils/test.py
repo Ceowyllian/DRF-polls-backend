@@ -16,7 +16,7 @@ class BaseAPITestCase(APITestCase):
         token = Token.objects.create(user=user)
         return user, f"Token {token.key}"
 
-    def assert_status_codes_equal(self, received: int, expected: int):
+    def assert_status_codes_equal(self, *, received: int, expected: int):
         self.assertEqual(
             received,
             expected,
