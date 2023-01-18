@@ -170,7 +170,7 @@ class TestQuestionRetrieve(TestCase):
         question_pk = -1
 
         with self.assertRaises(Question.DoesNotExist):
-            question = services.question.retrieve(question_pk=question_pk)
+            services.question.retrieve(question_pk=question_pk)
 
 
 class TestQuestionList(TestCase):
