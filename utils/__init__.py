@@ -1,6 +1,1 @@
-from . import (
-    services,
-    views,
-    test,
-    serializers,
-)
+from . import serializers, services, test, views

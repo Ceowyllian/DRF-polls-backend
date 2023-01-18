@@ -6,31 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('polls', '0003_alter_choice_choice_text_and_more'),
+        ("polls", "0003_alter_choice_choice_text_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='choice',
-            name='no identical choices for question',
+            model_name="choice",
+            name="no identical choices for question",
         ),
         migrations.RenameField(
-            model_name='choice',
-            old_name='choice_text',
-            new_name='text',
+            model_name="choice",
+            old_name="choice_text",
+            new_name="text",
         ),
         migrations.RenameField(
-            model_name='question',
-            old_name='question_text',
-            new_name='text',
+            model_name="question",
+            old_name="question_text",
+            new_name="text",
         ),
         migrations.RenameField(
-            model_name='question',
-            old_name='question_title',
-            new_name='title',
+            model_name="question",
+            old_name="question_title",
+            new_name="title",
         ),
         migrations.AddConstraint(
-            model_name='choice',
-            constraint=models.UniqueConstraint(fields=('text', 'question'), name='no identical choices for question'),
+            model_name="choice",
+            constraint=models.UniqueConstraint(
+                fields=("text", "question"), name="no identical choices for question"
+            ),
         ),
     ]

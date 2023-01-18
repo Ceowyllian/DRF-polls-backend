@@ -1,19 +1,18 @@
 from django.http import Http404
-from rest_framework import permissions
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.response import Response
 
 from utils import views
+
 from . import serializers, services
-from .models import Question, Choice
+from .models import Choice, Question
 from .pagination import CursorPagination, get_paginated_response
 
 
 class QuestionListCreateAPI(views.APIView):
-
     def get_permissions(self):
         method = self.request.method
-        if method == 'POST':
+        if method == "POST":
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
@@ -31,15 +30,17 @@ class QuestionListCreateAPI(views.APIView):
             serializer_class=serializers.QuestionListSerializer,
             queryset=questions,
             request=request,
-            view=self
+            view=self,
         )
 
     def post(self, request, *args, **kwargs):
         input = serializers.QuestionCreateSerializer(data=request.data)
         input.is_valid(raise_exception=True)
-        question = services.question.create(created_by=request.user, **input.validated_data)
+        question = services.question.create(
+            created_by=request.user, **input.validated_data
+        )
         output = serializers.QuestionDetailSerializer(
-            instance=question, context={'request': request}
+            instance=question, context={"request": request}
         )
         return Response(data=output.data, status=status.HTTP_201_CREATED)
 
@@ -47,39 +48,36 @@ class QuestionListCreateAPI(views.APIView):
 class QuestionRetrieveUpdateDeleteAPI(views.APIView):
     def get_permissions(self):
         method = self.request.method
-        if method in ('PUT', 'PATCH', 'DELETE'):
+        if method in ("PUT", "PATCH", "DELETE"):
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
     def get(self, request, *args, **kwargs):
         question = services.question.retrieve(
-            question_pk=kwargs['pk'], fetch_choices=True
+            question_pk=kwargs["pk"], fetch_choices=True
         )
         output = serializers.QuestionDetailSerializer(
-            instance=question, context={'request': request}
+            instance=question, context={"request": request}
         )
         return Response(data=output.data)
 
     def delete(self, request, *args, **kwargs):
-        services.question.destroy(
-            question_pk=kwargs['pk'],
-            destroyed_by=request.user
-        )
+        services.question.destroy(question_pk=kwargs["pk"], destroyed_by=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_update(self, partial=False):
         input = serializers.QuestionUpdateSerializer(
-            data=self.request.data,
-            partial=partial
+            data=self.request.data, partial=partial
         )
         input.is_valid(raise_exception=True)
         question = services.question.update(
-            question_pk=self.kwargs['pk'],
+            question_pk=self.kwargs["pk"],
             updated_by=self.request.user,
-            data=input.validated_data
+            data=input.validated_data,
         )
         output = serializers.QuestionDetailSerializer(
-            instance=question, context={'request': self.request})
+            instance=question, context={"request": self.request}
+        )
 
         return Response(data=output.data)
 
@@ -96,23 +94,18 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
 
 
 class VoteCreateDeleteAPI(views.APIView):
-
     def get_permissions(self):
         method = self.request.method
-        if method in ('POST', 'DELETE'):
+        if method in ("POST", "DELETE"):
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
     def post(self, request, *args, **kwargs):
-        services.vote.perform_vote(
-            choice_pk=kwargs['pk'], user=request.user
-        )
+        services.vote.perform_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
-        services.vote.cancel_vote(
-            choice_pk=kwargs['pk'], user=request.user
-        )
+        services.vote.cancel_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def handle_exception(self, exc):

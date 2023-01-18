@@ -31,32 +31,30 @@ class QuestionUpdateSerializer(serializers.Serializer):
 
 
 class VoteCreateSerializer(serializers.Serializer):
-    choice_pk = serializers.IntegerField(
-        min_value=1, required=True
-    )
+    choice_pk = serializers.IntegerField(min_value=1, required=True)
 
 
 class QuestionDetailSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Question
-        fields = ('url', 'pk', 'title', 'text', 'created_by', 'pub_date', 'choices')
+        fields = ("url", "pk", "title", "text", "created_by", "pub_date", "choices")
         extra_kwargs = {
-            'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
-            'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
+            "url": {"view_name": "question-detail", "lookup_field": "pk"},
+            "created_by": {"view_name": "user-detail", "lookup_field": "username"},
         }
 
     class ChoiceSerializer(serializers.Serializer):
         pk = serializers.IntegerField()
         text = serializers.CharField()
 
-    choices = ChoiceSerializer(many=True, source='choice_set')
+    choices = ChoiceSerializer(many=True, source="choice_set")
 
 
 class QuestionListSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Question
-        fields = ('url', 'pk', 'title', 'created_by', 'pub_date')
+        fields = ("url", "pk", "title", "created_by", "pub_date")
         extra_kwargs = {
-            'url': {'view_name': 'question-detail', 'lookup_field': 'pk'},
-            'created_by': {'view_name': 'user-detail', 'lookup_field': 'username'}
+            "url": {"view_name": "question-detail", "lookup_field": "pk"},
+            "created_by": {"view_name": "user-detail", "lookup_field": "username"},
         }

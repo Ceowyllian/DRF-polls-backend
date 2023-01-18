@@ -1,61 +1,51 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase
 
-from polls.models import (
-    Question,
-    Choice,
-    Vote,
-)
-from . import fixtures
-from .fixtures import Q, C
+from polls.models import Choice, Question, Vote
+
 from .. import services
+from . import fixtures
+from .fixtures import C, Q
 
 User = get_user_model()
 
 
 class TestCreateQuestionInstance(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='xavia3k',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="xavia3k",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
 
     def test_created_successfully(self):
         question_data = fixtures.question()
 
-        question = services.question.create_question_instance(created_by=self.user, **question_data)
+        question = services.question.create_question_instance(
+            created_by=self.user, **question_data
+        )
 
         for field, value in question_data.items():
             self.assertEquals(getattr(question, field), value)
 
     def test_fail_too_short_title(self):
-        question_data = fixtures.question(
-            title=Q.title.too_short()
-        )
+        question_data = fixtures.question(title=Q.title.too_short())
         self.unable_to_create(**question_data)
 
     def test_fail_too_long_title(self):
-        question_data = fixtures.question(
-            title=Q.title.too_long()
-        )
+        question_data = fixtures.question(title=Q.title.too_long())
         self.unable_to_create(**question_data)
 
     def test_fail_too_short_text(self):
-        question_data = fixtures.question(
-            title=Q.text.too_short()
-        )
+        question_data = fixtures.question(title=Q.text.too_short())
         self.unable_to_create(**question_data)
 
     def test_fail_too_long_text(self):
-        question_data = fixtures.question(
-            title=Q.text.too_long()
-        )
+        question_data = fixtures.question(title=Q.text.too_long())
         self.unable_to_create(**question_data)
 
     def unable_to_create(self, **kwargs):
@@ -64,25 +54,22 @@ class TestCreateQuestionInstance(TestCase):
 
 
 class TestCreateChoiceInstances(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='xavia3k',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="xavia3k",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
         cls.question = Question.objects.create(
-            **fixtures.question(),
-            created_by=cls.user
+            **fixtures.question(), created_by=cls.user
         )
 
     def test_created_successfully(self):
         choices = fixtures.choice_list()
 
         instances = services.question.create_choice_instances(
-            question=self.question,
-            choices=choices
+            question=self.question, choices=choices
         )
 
         self.assertEquals(len(instances), len(choices))
@@ -112,32 +99,26 @@ class TestCreateChoiceInstances(TestCase):
     def unable_to_create(self, choices):
         with self.assertRaises(ValidationError):
             services.question.create_choice_instances(
-                question=self.question,
-                choices=choices
+                question=self.question, choices=choices
             )
 
 
 class TestQuestionDestroy(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='xavia3k',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="xavia3k",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
         cls.question = Question.objects.create(
-            **fixtures.question(),
-            created_by=cls.user
+            **fixtures.question(), created_by=cls.user
         )
 
     def test_destroyed_successfully(self):
         question_pk = self.question.pk
 
-        services.question.destroy(
-            question_pk=question_pk,
-            destroyed_by=self.user
-        )
+        services.question.destroy(question_pk=question_pk, destroyed_by=self.user)
 
         with self.assertRaises(Question.DoesNotExist):
             Question.objects.get(id=question_pk)
@@ -146,38 +127,32 @@ class TestQuestionDestroy(TestCase):
         question_pk = -1
 
         with self.assertRaises(Question.DoesNotExist):
-            services.question.destroy(
-                question_pk=question_pk,
-                destroyed_by=self.user
-            )
+            services.question.destroy(question_pk=question_pk, destroyed_by=self.user)
 
     def test_fail_permission_denied(self):
         question_pk = self.question.pk
         another_user = User.objects.create_user(
-            username='radamesdck7',
-            password='fQG2tmyGg7w5s7kbzlD3X2Ht',
-            email='constantina_khalildyb@lake.nr'
+            username="radamesdck7",
+            password="fQG2tmyGg7w5s7kbzlD3X2Ht",
+            email="constantina_khalildyb@lake.nr",
         )
 
         with self.assertRaises(PermissionDenied):
             services.question.destroy(
-                question_pk=question_pk,
-                destroyed_by=another_user
+                question_pk=question_pk, destroyed_by=another_user
             )
 
 
 class TestQuestionRetrieve(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='xavia3k',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="xavia3k",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
         cls.question = Question.objects.create(
-            **fixtures.question(),
-            created_by=cls.user
+            **fixtures.question(), created_by=cls.user
         )
         cls.choices = [
             Choice.objects.create(text=text, question=cls.question)
@@ -195,16 +170,16 @@ class TestQuestionRetrieve(TestCase):
         question_pk = -1
 
         with self.assertRaises(Question.DoesNotExist):
-            question = services.question.retrieve(question_pk=question_pk)
+            services.question.retrieve(question_pk=question_pk)
 
 
 class TestQuestionList(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='test_user', password='3pD5oykYb2s',
-            email='archibald_moreltaq@cups.ws'
+            username="test_user",
+            password="3pD5oykYb2s",
+            email="archibald_moreltaq@cups.ws",
         )
 
     def test_filter_by_created_by(self):
@@ -213,24 +188,21 @@ class TestQuestionList(TestCase):
         expected_questions = set()
         for _ in range(3):
             expected_questions.add(
-                Question.objects.create(
-                    created_by=self.user, **fixtures.question())
+                Question.objects.create(created_by=self.user, **fixtures.question())
             )
 
         another_user = User.objects.create_user(
-            username='rakeshap', password='24dQdzXxH13a',
-            email='tawan_brayr@hiv.bxu'
+            username="rakeshap", password="24dQdzXxH13a", email="tawan_brayr@hiv.bxu"
         )
         # Questions that SHOULD NEVER appear in the results
         unsuitable_questions = set()
         for _ in range(5):
             unsuitable_questions.add(
-                Question.objects.create(
-                    created_by=another_user, **fixtures.question())
+                Question.objects.create(created_by=another_user, **fixtures.question())
             )
 
         results = services.question.question_list(
-            filters={'created_by': self.user.username}
+            filters={"created_by": self.user.username}
         )
 
         self.assertEquals(len(results), len(expected_questions))
@@ -250,8 +222,8 @@ class TestQuestionList(TestCase):
         for _ in range(5):
             expected_questions.add(
                 Question.objects.create(
-                    title='aaaa', text='blablabla',
-                    created_by=self.user)
+                    title="aaaa", text="blablabla", created_by=self.user
+                )
             )
 
         # Questions that SHOULD NEVER appear in the results
@@ -259,13 +231,11 @@ class TestQuestionList(TestCase):
         for _ in range(5):
             unsuitable_questions.add(
                 Question.objects.create(
-                    title='bbbb', text='blablabla',
-                    created_by=self.user)
+                    title="bbbb", text="blablabla", created_by=self.user
+                )
             )
 
-        results = services.question.question_list(
-            filters={'title': 'aaaa'}
-        )
+        results = services.question.question_list(filters={"title": "aaaa"})
 
         self.assertEquals(len(results), len(expected_questions))
 
@@ -284,8 +254,8 @@ class TestQuestionList(TestCase):
         for _ in range(5):
             expected_questions.add(
                 Question.objects.create(
-                    title='blablabla', text='aaaa',
-                    created_by=self.user)
+                    title="blablabla", text="aaaa", created_by=self.user
+                )
             )
 
         # Questions that SHOULD NEVER appear in the results
@@ -293,13 +263,11 @@ class TestQuestionList(TestCase):
         for _ in range(5):
             unsuitable_questions.add(
                 Question.objects.create(
-                    title='blablabla', text='bbbb',
-                    created_by=self.user)
+                    title="blablabla", text="bbbb", created_by=self.user
+                )
             )
 
-        results = services.question.question_list(
-            filters={'text': 'aaaa'}
-        )
+        results = services.question.question_list(filters={"text": "aaaa"})
 
         self.assertEquals(len(results), len(expected_questions))
 
@@ -316,17 +284,15 @@ class TestQuestionList(TestCase):
         q1 = Question.objects.create(
             **fixtures.question(),
             created_by=self.user,
-            pub_date=datetime(year=2022, month=12, day=4)
+            pub_date=datetime(year=2022, month=12, day=4),
         )
         q2 = Question.objects.create(
             **fixtures.question(),
             created_by=self.user,
-            pub_date=datetime(year=2022, month=12, day=10)
+            pub_date=datetime(year=2022, month=12, day=10),
         )
 
-        queryset = services.question.question_list(
-            filters={'date_before': '2022-12-9'}
-        )
+        queryset = services.question.question_list(filters={"date_before": "2022-12-9"})
 
         self.assertIn(q1, queryset)
         self.assertNotIn(q2, queryset)
@@ -335,51 +301,39 @@ class TestQuestionList(TestCase):
         q1 = Question.objects.create(
             **fixtures.question(),
             created_by=self.user,
-            pub_date=datetime(year=2022, month=12, day=4)
+            pub_date=datetime(year=2022, month=12, day=4),
         )
         q2 = Question.objects.create(
             **fixtures.question(),
             created_by=self.user,
-            pub_date=datetime(year=2022, month=12, day=10)
+            pub_date=datetime(year=2022, month=12, day=10),
         )
 
-        queryset = services.question.question_list(
-            filters={'date_after': '2022-12-5'}
-        )
+        queryset = services.question.question_list(filters={"date_after": "2022-12-5"})
 
         self.assertIn(q2, queryset)
         self.assertNotIn(q1, queryset)
 
 
 class TestPerformVote(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='test_user',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="test_user",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
         cls.question = Question.objects.create(
             **fixtures.question(),
             created_by=cls.user,
         )
-        cls.choice_1 = Choice.objects.create(
-            text='foo',
-            question=cls.question
-        )
-        cls.choice_2 = Choice.objects.create(
-            text='bar',
-            question=cls.question
-        )
+        cls.choice_1 = Choice.objects.create(text="foo", question=cls.question)
+        cls.choice_2 = Choice.objects.create(text="bar", question=cls.question)
 
     def test_perform_vote_successfully(self):
         self.assertEqual(self.choice_1.vote_set.count(), 0)
 
-        services.vote.perform_vote(
-            choice_pk=self.choice_1.pk,
-            user=self.user
-        )
+        services.vote.perform_vote(choice_pk=self.choice_1.pk, user=self.user)
 
         self.assertEqual(self.choice_1.vote_set.count(), 1)
 
@@ -391,10 +345,7 @@ class TestPerformVote(TestCase):
         )
 
         with self.assertRaises(ValidationError):
-            services.vote.perform_vote(
-                choice_pk=self.choice_1.pk,
-                user=self.user
-            )
+            services.vote.perform_vote(choice_pk=self.choice_1.pk, user=self.user)
 
     def test_fail_to_vote_twice_for_the_same_question(self):
         Vote.objects.create(
@@ -404,29 +355,22 @@ class TestPerformVote(TestCase):
         )
 
         with self.assertRaises(ValidationError):
-            services.vote.perform_vote(
-                choice_pk=self.choice_2.pk,
-                user=self.user
-            )
+            services.vote.perform_vote(choice_pk=self.choice_2.pk, user=self.user)
 
 
 class TestCancelVote(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
-            username='test_user',
-            password='3pD5oykYb2sUIZWYMje',
-            email='archibald_moreltaq@cups.ws'
+            username="test_user",
+            password="3pD5oykYb2sUIZWYMje",
+            email="archibald_moreltaq@cups.ws",
         )
         cls.question = Question.objects.create(
             **fixtures.question(),
             created_by=cls.user,
         )
-        cls.choice = Choice.objects.create(
-            text='foo',
-            question=cls.question
-        )
+        cls.choice = Choice.objects.create(text="foo", question=cls.question)
         cls.vote = Vote.objects.create(
             voted_by=cls.user,
             question=cls.question,
@@ -436,10 +380,7 @@ class TestCancelVote(TestCase):
     def test_cancel_vote_successfully(self):
         self.assertEquals(self.choice.vote_set.count(), 1)
 
-        services.vote.cancel_vote(
-            choice_pk=self.choice.pk,
-            user=self.user
-        )
+        services.vote.cancel_vote(choice_pk=self.choice.pk, user=self.user)
 
         self.assertEquals(self.choice.vote_set.count(), 0)
 
@@ -448,7 +389,4 @@ class TestCancelVote(TestCase):
         self.assertEquals(self.choice.vote_set.count(), 0)
 
         with self.assertRaises(ValidationError):
-            services.vote.cancel_vote(
-                choice_pk=self.choice.pk,
-                user=self.user
-            )
+            services.vote.cancel_vote(choice_pk=self.choice.pk, user=self.user)

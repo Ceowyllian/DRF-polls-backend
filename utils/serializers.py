@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 
 class ModelSerializer(serializers.ModelSerializer):
-
     def save(self, **kwargs):
         raise NotImplementedError
 
@@ -14,7 +13,6 @@ class ModelSerializer(serializers.ModelSerializer):
 
 
 class HyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
-
     def save(self, **kwargs):
         raise NotImplementedError
 
