@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 from common import UserModelType
-from polls.models import Vote, Choice
+from polls.models import Choice, Vote
 
 
 def perform_vote(*, choice_pk: int, user: UserModelType):

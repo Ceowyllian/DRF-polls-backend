@@ -1,4 +1,1 @@
-from . import (
-    vote,
-    question,
-)
+from . import question, vote

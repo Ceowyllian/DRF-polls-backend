@@ -1,11 +1,11 @@
 from django.http import Http404
-from rest_framework import permissions
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.response import Response
 
 from utils import views
+
 from . import serializers, services
-from .models import Question, Choice
+from .models import Choice, Question
 from .pagination import CursorPagination, get_paginated_response
 
 

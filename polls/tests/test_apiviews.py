@@ -3,9 +3,9 @@ import json
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
-from polls.models import Choice, Vote
-from polls.models import Question
+from polls.models import Choice, Question, Vote
 from utils.test import BaseAPITestCase
+
 from . import fixtures
 from .fixtures import C, Q
 

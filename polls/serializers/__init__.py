@@ -1,8 +1,3 @@
-from .serializers import (
-    VoteCreateSerializer,
-    QuestionUpdateSerializer,
-    QuestionCreateSerializer,
-    QuestionDetailSerializer,
-    QuestionListSerializer,
-    QuestionFilterSerializer,
-)
+from .serializers import (QuestionCreateSerializer, QuestionDetailSerializer,
+                          QuestionFilterSerializer, QuestionListSerializer,
+                          QuestionUpdateSerializer, VoteCreateSerializer)

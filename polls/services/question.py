@@ -1,12 +1,12 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 import django_filters
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.db import transaction, models
+from django.db import models, transaction
 
 from common import UserModelType
-from polls.models import Question, Choice, choice_set_validators
+from polls.models import Choice, Question, choice_set_validators
 from utils.services import model_update
 
 User: UserModelType = get_user_model()

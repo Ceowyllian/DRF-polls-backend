@@ -4,27 +4,22 @@ from django.contrib.auth import get_user_model
 
 if __name__ == "__main__":
     import os
+
     import django
 
     os.environ["DJANGO_SETTINGS_MODULE"] = "backend.settings"
     django.setup()
 
-import warnings
-from random import (
-    randint,
-    choice as random_choice,
-)
 import string
+import warnings
+from random import choice as random_choice
+from random import randint
+
 from django_seed import Seed
 from faker import Faker
-from faker.providers import (
-    date_time,
-    profile,
-)
-from polls.models import (
-    Question,
-    Choice,
-)
+from faker.providers import date_time, profile
+
+from polls.models import Choice, Question
 
 USERS = 4
 QUESTIONS = 7

@@ -1,10 +1,7 @@
 from django.urls import path
 
-from .apiviews import (
-    QuestionListCreateAPI,
-    QuestionRetrieveUpdateDeleteAPI,
-    VoteCreateDeleteAPI,
-)
+from .apiviews import (QuestionListCreateAPI, QuestionRetrieveUpdateDeleteAPI,
+                       VoteCreateDeleteAPI)
 
 urlpatterns = [
     path("questions/", QuestionListCreateAPI.as_view()),

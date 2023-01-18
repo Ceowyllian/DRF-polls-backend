@@ -1,17 +1,14 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase
 
-from polls.models import (
-    Question,
-    Choice,
-    Vote,
-)
-from . import fixtures
-from .fixtures import Q, C
+from polls.models import Choice, Question, Vote
+
 from .. import services
+from . import fixtures
+from .fixtures import C, Q
 
 User = get_user_model()
 

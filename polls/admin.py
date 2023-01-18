@@ -1,10 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    Question,
-    Choice,
-    Vote,
-)
+from .models import Choice, Question, Vote
 
 # Register your models here.
 admin.site.register(Question)

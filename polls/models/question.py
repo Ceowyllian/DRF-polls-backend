@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.utils import timezone
 

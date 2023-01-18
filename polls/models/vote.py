@@ -3,8 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from common import UserModelType
-from . import Choice
-from . import Question
+
+from . import Choice, Question
 
 User: UserModelType = get_user_model()
 
