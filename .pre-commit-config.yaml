@@ -17,3 +17,4 @@ repos:
       - id: isort
         name: isort (python)
         entry: isort .
+        pass_filenames: false
