@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from common import UserModelType
-from polls.models import Question
-from utils.serializers import HyperlinkedModelSerializer
+from django_polls.common import UserModelType
+from django_polls.polls.models import Question
+from django_polls.utils.serializers import HyperlinkedModelSerializer
 
 User: UserModelType = get_user_model()
 

@@ -4,11 +4,10 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase
 
-from polls.models import Choice, Question, Vote
-
-from .. import services
-from . import fixtures
-from .fixtures import C, Q
+from django_polls.polls import services
+from django_polls.polls.models import Choice, Question, Vote
+from django_polls.polls.tests import fixtures
+from django_polls.polls.tests.fixtures import C, Q
 
 User = get_user_model()
 

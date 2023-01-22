@@ -8,7 +8,7 @@ __all__ = (
 
 from django.utils.crypto import get_random_string
 
-from ..models import ChoiceConfig, QuestionConfig
+from django_polls.polls.models import ChoiceConfig, QuestionConfig
 
 
 class Q:

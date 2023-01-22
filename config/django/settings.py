@@ -32,8 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 LOCAL_APPS = [
-    "users",
-    "polls",
+    "django_polls.users",
+    "django_polls.polls",
 ]
 
 THIRD_PARTY_APPS = [

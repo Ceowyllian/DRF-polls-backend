@@ -3,11 +3,10 @@ import json
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
-from polls.models import Choice, Question, Vote
-from utils.test import BaseAPITestCase
-
-from . import fixtures
-from .fixtures import C, Q
+from django_polls.polls.models import Choice, Question, Vote
+from django_polls.polls.tests import fixtures
+from django_polls.polls.tests.fixtures import C, Q
+from django_polls.utils.test import BaseAPITestCase
 
 User = get_user_model()
 

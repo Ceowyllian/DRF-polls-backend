@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from common import UserModelType
+from django_polls.common import UserModelType
 
 from . import Choice, Question
 

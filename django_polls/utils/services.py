@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Tuple
 
-from common import ModelType
+from django_polls.common import ModelType
 
 
 # Copied from
