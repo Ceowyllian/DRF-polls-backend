@@ -2,7 +2,6 @@
 [run]
 branch = True
 
-[run]
 omit =
     /config/*
     manage.py
