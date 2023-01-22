@@ -1,0 +1,17 @@
+[packages]
+Django="4.1"
+djangorestframework="3.13.1"
+djoser="2.1.0"
+django-cors-headers="3.13.0"
+django-filter="22.1"
+psycopg2="2.9.3"
+
+[dev-packages]
+Faker="14.2.0"
+flake8="6.0.0"
+isort="5.11.4"
+black="22.12.0"
+pre-commit="2.21.0"
+
+[requires]
+python_version = "3.10.2"
