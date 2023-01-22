@@ -31,6 +31,20 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+LOCAL_APPS = [
+    "custom_auth",
+    "polls",
+]
+
+THIRD_PARTY_APPS = [
+    "corsheaders",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "django_filters",
+    "django_seed",
+]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -38,14 +52,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "corsheaders",
-    "rest_framework",
-    "rest_framework.authtoken",
-    "djoser",
-    "django_filters",
-    "django_seed",
-    "custom_auth",
-    "polls",
+    *THIRD_PARTY_APPS,
+    *LOCAL_APPS,
 ]
 
 MIDDLEWARE = [
