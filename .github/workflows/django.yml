@@ -61,6 +61,9 @@ jobs:
           python manage.py migrate
           coverage run manage.py test
           coverage xml
+      - name: fix code coverage paths
+        run: |
+          sed -i 's/\/home\/runner\/work\/DRF-polls-backend\/DRF-polls-backend\//\/github\/workspace\//g' coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
