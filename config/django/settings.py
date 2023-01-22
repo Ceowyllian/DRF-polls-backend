@@ -42,7 +42,6 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "djoser",
     "django_filters",
-    "django_seed",
 ]
 
 INSTALLED_APPS = [
