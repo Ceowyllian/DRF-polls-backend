@@ -48,7 +48,7 @@ jobs:
       - name: Run isort
         uses: isort/isort-action@master
 
-      - name: Run Tests
+      - name: Run tests with coverage
         env:
           DB_ENGINE: django.db.backends.postgresql_psycopg2
           DB_HOST: localhost
@@ -59,15 +59,9 @@ jobs:
         run: |
           python manage.py makemigrations
           python manage.py migrate
-          python manage.py test
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    environment: drf-polls-api
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          coverage run manage.py test
+          coverage.xml
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
