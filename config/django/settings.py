@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 LOCAL_APPS = [
-    "custom_auth",
+    "users",
     "polls",
 ]
 
@@ -103,7 +103,7 @@ DATABASES = {
 
 # Custom auth user model
 
-AUTH_USER_MODEL = "custom_auth.User"
+AUTH_USER_MODEL = "users.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
