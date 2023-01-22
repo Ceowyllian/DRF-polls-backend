@@ -2,3 +2,5 @@
 Sample django polls app.
 
 ![example workflow](https://github.com/Ceowyllian/DRF-polls-backend/actions/workflows/django.yml/badge.svg)
+
+[![MIT Licensed][badge-mit]][license]
