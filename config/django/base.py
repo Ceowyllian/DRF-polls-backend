@@ -170,4 +170,4 @@ DJOSER = {
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = default_headers + ("cache-control", "cookies")
-CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:8000"]
