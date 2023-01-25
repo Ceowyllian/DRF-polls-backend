@@ -81,18 +81,15 @@ pip install -r requirements\base.txt -r requirements\local.txt
 ### Configure the environment
 
 To specify the environment variables simply create the `.env` file in the root directory, where the `manage.py` file is
-located.
+located. Here is the list of the required variables:
 
-You can specify the path to another file with variables using the `ENV_PATH` variable (e.g. place it in
-the `.env` file). Here is the list of the required variables:
-
-| Variable                   | Example (plain text)                             | Default (Python value) |
-|----------------------------|--------------------------------------------------|------------------------|
-| **DB_URL** - necessary     | `postgres://username:password@host:port/db_name` | `None`                 |
-| **SECRET_KEY** - necessary | `PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN`    | `None`                 |
-| DJANGO_DEBUG               | `False`                                          | `False`                |
-| CORS_ALLOWED_ORIGINS       | `http://localhost:8080, https://example.com `    | `[]`                   |
-| ENV_PATH                   | `env\production.env`                             | `".env"`               |
+| Variable                    | Example (plain text)                             | Default (Python value) |
+|-----------------------------|--------------------------------------------------|------------------------|
+| DB_URL                      | `postgres://username:password@host:port/db_name` | `None`                 |
+| **SECRET_KEY** - necessary  | `PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN`    | `None`                 |
+| DJANGO_DEBUG                | `False`                                          | `False`                |
+| CORS_ALLOWED_ORIGINS        | `http://localhost:8080, https://example.com `    | `[]`                   |
+| SECURE_CONTENT_TYPE_NOSNIFF | True                                             | True                   |
 
 For more information, read the following articles:
 
