@@ -20,7 +20,9 @@ jobs:
       postgres:
         image: postgres
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
         ports: ['5432:5432']
 
     steps:
