@@ -14,20 +14,18 @@ import os
 
 from corsheaders.defaults import default_headers
 
-from config.env import BASE_DIR, env
-
-env.read_env(os.path.join(BASE_DIR, ".env"))
+from config.env import env
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = "=ug_ucl@yi6^mrcjyz%(u0%&g2adt#bz3@yos%#@*t#t!ypx=a"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DJANGO_DEBUG", default=False)
+DEBUG = True
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -89,7 +87,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-DATABASES = {"default": env.db(var="DB_URL", engine="postgresql")}
+DATABASES = {"default": env.db(var="DB_URL", default="postgres://django_polls_db")}
 
 if os.environ.get("GITHUB_WORKFLOW"):
     DATABASES = {
@@ -172,4 +170,4 @@ DJOSER = {
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = default_headers + ("cache-control", "cookies")
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CORS_ALLOWED_ORIGINS = ["*"]
