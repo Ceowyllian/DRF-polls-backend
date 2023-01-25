@@ -19,16 +19,14 @@ ___
 
 <!-- TOC -->
 
-* [DRF polls backend](#drf-polls-backend)
-    * [Table of contents](#table-of-contents)
-    * [System requirements](#system-requirements)
-    * [Installation](#installation)
-        * [Create a DB and a user for the django project](#create-a-db-and-a-user-for-the-django-project)
-        * [Clone this repo and install the dependencies](#clone-this-repo-and-install-the-dependencies)
-        * [Configure the environment](#configure-the-environment)
-        * [Create a DB schema and an administrator user](#create-a-db-schema-and-an-administrator-user)
-    * [Run](#run)
-        * [Local development server](#local-development-server)
+* [Table of contents](#table-of-contents)
+* [System requirements](#system-requirements)
+* [Installation](#installation)
+    * [1 Create a DB and a user for the django project](#1-create-a-db-and-a-user-for-the-django-project)
+    * [2 Clone this repo and install the dependencies](#2-clone-this-repo-and-install-the-dependencies)
+    * [3 Configure the environment](#3-configure-the-environment)
+    * [4 Create a DB schema and an administrator user](#4-create-a-db-schema-and-an-administrator-user)
+* [Run the local server](#run-the-local-server)
 
 <!-- TOC -->
 
@@ -42,9 +40,9 @@ ___
 All the steps described below were performed on a computer with `Windows 10` installed. If you are not using `Windows`,
 you may need to replace some shell commands with those that match your OS.
 
-### Create a DB and a user for the django project
+### 1 Create a DB and a user for the django project
 
-```postgresql
+```sql
 -- Create database named "django_polls_db".
 CREATE DATABASE django_polls_db;
 
@@ -60,7 +58,7 @@ ALTER ROLE django_polls_user SET timezone TO 'UTC';
 GRANT ALL PRIVILEGES ON DATABASE django_polls_db TO django_polls_user;
 ```
 
-### Clone this repo and install the dependencies
+### 2 Clone this repo and install the dependencies
 
 Clone branch `master` and switch to the project directory (make sure you have `git` and `python` installed in
 your `PATH` variable):
@@ -78,18 +76,18 @@ venv\Scripts\activate
 pip install -r requirements\base.txt -r requirements\local.txt
 ```
 
-### Configure the environment
+### 3 Configure the environment
 
 To specify the environment variables simply create the `.env` file in the root directory, where the `manage.py` file is
-located. Here is the list of the required variables:
+located. Here is the list of all the variables:
 
-| Variable                    | Example (plain text)                             | Default (Python value) |
-|-----------------------------|--------------------------------------------------|------------------------|
-| DB_URL                      | `postgres://username:password@host:port/db_name` | `None`                 |
-| **SECRET_KEY** - necessary  | `PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN`    | `None`                 |
-| DJANGO_DEBUG                | `False`                                          | `False`                |
-| CORS_ALLOWED_ORIGINS        | `http://localhost:8080, https://example.com `    | `[]`                   |
-| SECURE_CONTENT_TYPE_NOSNIFF | True                                             | True                   |
+| Variable                    | Example (plain text)                             | Default (Python value)         |
+|-----------------------------|--------------------------------------------------|--------------------------------|
+| DB_URL                      | `postgres://username:password@host:port/db_name` | `"postgres://django_polls_db"` |
+| **SECRET_KEY** - necessary  | `PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN`    | `None`                         |
+| DJANGO_DEBUG                | `False`                                          | `False`                        |
+| CORS_ALLOWED_ORIGINS        | `http://localhost:8080, https://example.com `    | `[]`                           |
+| SECURE_CONTENT_TYPE_NOSNIFF | `True`                                           | `True`                         |
 
 For more information, read the following articles:
 
@@ -97,7 +95,7 @@ For more information, read the following articles:
 - ["django-environ" package](https://django-environ.readthedocs.io/en/latest/index.html)
   and [how to use multiple ".env" files](https://django-environ.readthedocs.io/en/latest/index.html)
 
-### Create a DB schema and an administrator user
+### 4 Create a DB schema and an administrator user
 
 Run manage.py commands to make migrations and create all the necessary DB tables:
 
@@ -112,10 +110,17 @@ Create an admin user using the following command (you will need to choose an ema
  python manage.py createsuperuser
 ```
 
-## Run
+Now the application is ready to be launched and tested.
 
-### Local development server
+## Run the local server
 
 ```shell
 python manage.py runserver
 ```
+
+During this run will be used the settings from [base.py](/config/django/base.py). You can specify the Django settings
+file by adding an environment variable to your run configuration (not in the file `.env`):
+
+- `DJANGO_SETTINGS_MODULE=config.django.test`
+- `DJANGO_SETTINGS_MODULE=config.django.production`
+- `DJANGO_SETTINGS_MODULE=config.django.base` (default)
