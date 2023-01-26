@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 LOCAL_APPS = [
+    "django_polls.api",
     "django_polls.users",
     "django_polls.polls",
 ]
