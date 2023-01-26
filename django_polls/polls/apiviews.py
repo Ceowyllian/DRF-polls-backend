@@ -1,11 +1,10 @@
 from django.http import Http404
-from rest_framework import permissions, status
+from rest_framework import permissions, status, views
 from rest_framework.response import Response
 
+from django_polls.api.pagination import CursorPagination, get_paginated_response
 from django_polls.polls import serializers, services
 from django_polls.polls.models import Choice, Question
-from django_polls.polls.pagination import CursorPagination, get_paginated_response
-from django_polls.utils import views
 
 
 class QuestionListCreateAPI(views.APIView):
