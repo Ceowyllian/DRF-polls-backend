@@ -6,8 +6,6 @@ django-cors-headers="3.13.0"
 django-environ="0.9.0"
 django-filter="22.1"
 psycopg2="2.9.3"
-coverage = "*"
-pytest-django = "*"
 
 [dev-packages]
 Faker="14.2.0"
