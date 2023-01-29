@@ -14,7 +14,10 @@ import os
 
 from corsheaders.defaults import default_headers
 
-from config.env import env
+from config.env import BASE_DIR, env
+
+env.read_env(os.path.join(BASE_DIR, ".env"))
+env.read_env(env.str("ENV_PATH", ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

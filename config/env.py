@@ -2,7 +2,6 @@ import environ
 from django.core.exceptions import ImproperlyConfigured
 
 env = environ.Env()
-env.read_env(env.str("ENV_PATH", ".env"))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = environ.Path(__file__) - 2
