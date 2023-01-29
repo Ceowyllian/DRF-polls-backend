@@ -213,7 +213,7 @@ class TestQuestionDelete:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/questions/%s/"
+    uri = "/polls/questions/123/"
 
     def test_204_deleted_successfully(self, monkeypatch, api_client, user):
         def destroy_mock(*args, **kwargs):
