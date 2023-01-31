@@ -3,9 +3,10 @@
 branch = True
 
 omit =
-    /config/*
+    */config/*
     manage.py
     */tests/*
+    */migrations/
 
 [report]
 # Regexes for lines to exclude from consideration
