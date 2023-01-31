@@ -6,4 +6,8 @@ skip_glob = ["*/migrations/*"]
 [tool.black]
 # By default, `black` will ignore skip configuration when paths are explicitly provided.
 # In order for `pre-commit` to respect this configuration, `force-exclude` needs to be explicitly set.
-force-exclude = 'migrations'
+force-exclude = "migrations"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.django.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]

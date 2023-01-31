@@ -14,7 +14,10 @@ import os
 
 from corsheaders.defaults import default_headers
 
-from config.env import env
+from config.env import BASE_DIR, env
+
+env.read_env(os.path.join(BASE_DIR, ".env"))
+env.read_env(env.str("ENV_PATH", ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -30,8 +33,9 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 LOCAL_APPS = [
-    "django_polls.users",
-    "django_polls.polls",
+    "django_polls.api.apps.ApiConfig",
+    "django_polls.users.apps.UsersConfig",
+    "django_polls.polls.apps.PollsConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -154,6 +158,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "EXCEPTION_HANDLER": "django_polls.api.exception_handlers.exception_handler",
 }
 
 # Djoser settings
