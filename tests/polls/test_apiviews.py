@@ -1,45 +1,9 @@
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
-from rest_framework.test import APIClient
 
 from django_polls.api import pagination
-from django_polls.common import UserModelType
 from django_polls.polls import services
 from django_polls.polls.models import Choice, Question
-
-
-@pytest.fixture()
-def api_client() -> APIClient:
-    client = APIClient()
-    return client
-
-
-@pytest.fixture()
-def valid_question_dict():
-    return {
-        "title": "Test question 94452132-8a83-4521-b889abc",
-        "text": "Test question text e2160d36-b68b-4b26-ad9d-a20f096166a4",
-        "choices": ["a", "b", "c"],
-    }
-
-
-@pytest.fixture()
-def invalid_question_dict():
-    return {"title": "", "text": "", "choices": []}
-
-
-@pytest.fixture()
-def user(django_user_model: UserModelType) -> UserModelType:
-    return django_user_model.objects.create_user(
-        username="TestUserA", email="testmailA@mail.com", password="mRCk1XPhTPQEvakVzfF"
-    )
-
-
-@pytest.fixture()
-def question(user) -> Question:
-    return Question.objects.create(
-        title="Test question", text="Test question text", created_by=user
-    )
 
 
 class TestQuestionList:
