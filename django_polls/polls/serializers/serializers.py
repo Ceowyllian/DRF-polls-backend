@@ -9,8 +9,7 @@ User: UserModelType = get_user_model()
 
 
 class QuestionFilterSerializer(serializers.Serializer):
-    title = serializers.CharField(required=False)
-    text = serializers.CharField(required=False)
+    search_query = serializers.CharField(required=False)
     created_by = serializers.CharField(required=False)
     date_before = serializers.DateField(required=False)
     date_after = serializers.DateField(required=False)
