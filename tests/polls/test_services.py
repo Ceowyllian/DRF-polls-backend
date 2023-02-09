@@ -129,7 +129,6 @@ class TestQuestionRetrieve:
 
 class TestQuestionList:
     def test_filter_by_created_by(self, user, another_user):
-
         # Questions that MUST appear in the results
         expected_questions = set()
         for _ in range(3):
@@ -158,7 +157,6 @@ class TestQuestionList:
             assert question not in results
 
     def test_filter_by_date_before(self, user):
-
         date_before = datetime(year=2022, month=12, day=4)
         current_date = "2022-12-9"
         date_after = datetime(year=2022, month=12, day=10)
