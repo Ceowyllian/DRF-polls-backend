@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.utils import timezone
@@ -56,3 +58,15 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class QuestionVector(models.Model):
+    question = models.OneToOneField(
+        Question, on_delete=models.CASCADE, editable=True, related_name="search"
+    )
+    title_and_text = SearchVectorField()
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=["title_and_text"]),
+        ]
