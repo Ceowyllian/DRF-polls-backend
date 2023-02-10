@@ -191,6 +191,36 @@ class TestQuestionList:
         assert question_before not in results
 
 
+class TestQuestionUpdate:
+    def test_update_successfully(self, user, question):
+        updated_fields = question_dict()
+
+        services.question.update(
+            question_pk=question.pk, updated_by=user, data=updated_fields
+        )
+        question.refresh_from_db()
+
+        for field, value in updated_fields.items():
+            assert getattr(question, field) == value
+
+    def test_fail_to_update_someone_elses_question(self, question, another_user):
+        updated_fields = question_dict()
+        with pytest.raises(PermissionDenied):
+            services.question.update(
+                question_pk=question.pk, updated_by=another_user, data=updated_fields
+            )
+
+    def test_fail_to_update_invalid_values(self, user, question):
+        updated_fields = question_dict(
+            title=Q.title.too_long(), text=Q.title.too_short()
+        )
+
+        with pytest.raises(ValidationError):
+            services.question.update(
+                question_pk=question.pk, updated_by=user, data=updated_fields
+            )
+
+
 class TestPerformVote:
     def test_perform_vote_successfully(self, user, choice_a):
         assert choice_a.vote_set.count() == 0
