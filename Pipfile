@@ -1,20 +1,20 @@
 [packages]
-Django="4.1"
+Django="4.2"
 djangorestframework="3.14.0"
-djoser="2.1.0"
-django-cors-headers="3.13.0"
-django-environ="0.9.0"
-django-filter="22.1"
-psycopg2="2.9.5"
+djoser="2.2.0"
+django-cors-headers="4.1.0"
+django-environ="0.10.0"
+django-filter="23.2"
+psycopg2-binary="2.9.6"
 
 [dev-packages]
-Faker="16.7.0"
+Faker="18.10.1"
 flake8="6.0.0"
 isort="5.12.0"
-black="23.1.0"
-pre-commit="3.0.4"
-coverage={version="*", extras=["toml"]}
+black="23.3.0"
+pre-commit="3.3.3"
+coverage={version="7.2.7", extras=["toml"]}
 pytest-django="4.5.2"
 
 [requires]
-python_version = "3.10.2"
+python_version = "3.11.4"
