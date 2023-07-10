@@ -33,9 +33,9 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 LOCAL_APPS = [
-    "django_polls.api.apps.ApiConfig",
-    "django_polls.users.apps.UsersConfig",
-    "django_polls.polls.apps.PollsConfig",
+    "apps.api.apps.ApiConfig",
+    "apps.users.apps.UsersConfig",
+    "apps.polls.apps.PollsConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    "EXCEPTION_HANDLER": "django_polls.api.exception_handlers.exception_handler",
+    "EXCEPTION_HANDLER": "apps.api.exception_handlers.exception_handler",
 }
 
 # Djoser settings

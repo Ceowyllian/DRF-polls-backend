@@ -5,7 +5,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.utils import timezone
 
-from django_polls.common import UserModelType
+from apps.common import UserModelType
 
 User: UserModelType = get_user_model()
 

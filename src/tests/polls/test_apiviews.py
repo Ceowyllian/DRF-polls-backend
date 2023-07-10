@@ -1,9 +1,9 @@
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from django_polls.api import pagination
-from django_polls.polls import services
-from django_polls.polls.models import Choice, Question
+from apps.api import pagination
+from apps.polls import services
+from apps.polls.models import Choice, Question
 
 
 class TestQuestionList:

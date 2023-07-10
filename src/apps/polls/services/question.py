@@ -6,9 +6,9 @@ from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 
-from django_polls.common import UserModelType
-from django_polls.polls.models import Choice, Question, choice_set_validators
-from django_polls.utils.services import model_update
+from apps.common import UserModelType
+from apps.polls.models import Choice, Question, choice_set_validators
+from apps.utils.services import model_update
 
 User: UserModelType = get_user_model()
 
