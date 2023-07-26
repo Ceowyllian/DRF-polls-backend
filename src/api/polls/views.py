@@ -3,7 +3,7 @@ from rest_framework import permissions, status, views
 from rest_framework.response import Response
 
 import services
-from api.pagination import CursorPagination, get_paginated_response
+from api.common.pagination import CursorPagination, get_paginated_response
 from api.polls import serializers
 from apps.polls.models import Choice, Question
 

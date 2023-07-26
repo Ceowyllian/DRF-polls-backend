@@ -6,5 +6,5 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
-    "EXCEPTION_HANDLER": "api.exception_handlers.exception_handler",
+    "EXCEPTION_HANDLER": "api.common.exception_handlers.exception_handler",
 }

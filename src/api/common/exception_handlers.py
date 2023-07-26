@@ -5,6 +5,10 @@ from rest_framework import exceptions
 from rest_framework.serializers import as_serializer_error
 from rest_framework.views import exception_handler as _exception_handler
 
+__all__ = [
+    "exception_handler",
+]
+
 
 def exception_handler(exc, ctx):
     if isinstance(exc, DjangoValidationError):

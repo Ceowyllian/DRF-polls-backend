@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from api.common.serializers import HyperlinkedModelSerializer
 from apps.common import UserModelType
 from apps.polls.models import Question
-from apps.utils.serializers import HyperlinkedModelSerializer
 
 __all__ = [
     "QuestionFilterSerializer",

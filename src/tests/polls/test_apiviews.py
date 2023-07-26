@@ -2,7 +2,7 @@ import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
 import services
-from api import pagination
+from api.common import pagination
 from apps.polls.models import Choice, Question
 
 
