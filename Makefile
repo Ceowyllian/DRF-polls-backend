@@ -17,3 +17,8 @@ test:
 
 cover:
 	$(v) && coverage run -m pytest -q --no-header --no-summary src\tests && coverage report
+
+freeze-requirements:
+	$(v) \
+	&& pipenv requirements > src\requirements.txt \
+ 	&& pipenv requirements > src\requirements-dev.txt --dev-only
