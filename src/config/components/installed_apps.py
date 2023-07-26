@@ -1,5 +1,4 @@
 LOCAL_APPS = [
-    "apps.api.apps.ApiConfig",
     "apps.users.apps.UsersConfig",
     "apps.polls.apps.PollsConfig",
 ]
