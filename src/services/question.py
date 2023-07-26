@@ -6,7 +6,7 @@ from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction
 
-from apps.common import UserModelType
+from apps.common.types import UserModelType
 from apps.polls.models import Choice, Question, choice_set_validators
 from services.common import model_update
 

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Tuple
 
-from apps.common import ModelType
+from apps.common.types import ModelType
 
 
 # Copied from
