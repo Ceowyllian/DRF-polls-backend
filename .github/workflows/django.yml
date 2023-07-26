@@ -30,6 +30,15 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
 
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v2.0.2
+        with:
+          directory: src
+          file_name: .env
+          fail_on_empty: true
+          envkey_DJANGO_DEBUG: 0
+          envkey_SECRET_KEY: 982d414b-d821-466c-9455-a9ce97495b94
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
