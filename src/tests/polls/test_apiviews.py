@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from apps.api import pagination
+from api import pagination
 from apps.polls import services
 from apps.polls.models import Choice, Question
 
@@ -13,7 +13,7 @@ class TestQuestionList:
     HTTP authorization is NOT required.
     """
 
-    uri = "/polls/questions/"
+    uri = "/api/polls/questions/"
 
     def test_200_questions_exist(self, monkeypatch, api_client):
         def question_list_mock(*args, **kwargs):
@@ -41,7 +41,7 @@ class TestQuestionCreate:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/questions/"
+    uri = "/api/polls/questions/"
 
     def test_201_created_successfully(
         self, monkeypatch, api_client, user, valid_question_dict
@@ -84,7 +84,7 @@ class TestQuestionRetrieve:
     HTTP authorization is NOT required.
     """
 
-    uri = "/polls/questions/123/"
+    uri = "/api/polls/questions/123/"
 
     def test_200_question_exists(self, monkeypatch, api_client, question):
         def retrieve_mock(*args, **kwargs):
@@ -114,7 +114,7 @@ class TestQuestionUpdate:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/questions/123/"
+    uri = "/api/polls/questions/123/"
 
     @pytest.fixture(scope="class")
     def updated_fields(self):
@@ -177,7 +177,7 @@ class TestQuestionDelete:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/questions/123/"
+    uri = "/api/polls/questions/123/"
 
     def test_204_deleted_successfully(self, monkeypatch, api_client, user):
         def destroy_mock(*args, **kwargs):
@@ -232,7 +232,7 @@ class TestVoteCreate:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/votes/123/"
+    uri = "/api/polls/votes/123/"
 
     def test_201_vote_successfully(self, monkeypatch, api_client, user):
         def perform_vote_mock(*args, **kwargs):
@@ -295,7 +295,7 @@ class TestVoteDelete:
     HTTP authorization IS required.
     """
 
-    uri = "/polls/votes/123/"
+    uri = "/api/polls/votes/123/"
 
     def test_204_cancel_vote_successfully(self, monkeypatch, api_client, user):
         def cancel_vote_mock(*args, **kwargs):
