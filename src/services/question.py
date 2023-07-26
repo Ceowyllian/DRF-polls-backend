@@ -34,7 +34,7 @@ def question_list(*, filters: Dict[str, Any] = None) -> models.QuerySet[Question
     return questions
 
 
-def retrieve(*, question_pk: int, fetch_choices: bool = False) -> Question:
+def question_retrieve(*, question_pk: int, fetch_choices: bool = False) -> Question:
     queryset = Question.objects.select_related("created_by")
 
     if fetch_choices:
@@ -43,10 +43,10 @@ def retrieve(*, question_pk: int, fetch_choices: bool = False) -> Question:
     return queryset.get(id=question_pk)
 
 
-def update(
+def question_update(
     *, question_pk: int, updated_by: UserModelType, data: Dict[str, Any]
 ) -> Question:
-    question = retrieve(question_pk=question_pk)
+    question = question_retrieve(question_pk=question_pk)
     if updated_by != question.created_by:
         raise PermissionDenied("You can't edit this question.")
 
@@ -56,8 +56,8 @@ def update(
     return question
 
 
-def destroy(*, question_pk: int, destroyed_by: UserModelType):
-    question = retrieve(question_pk=question_pk)
+def question_destroy(*, question_pk: int, destroyed_by: UserModelType):
+    question = question_retrieve(question_pk=question_pk)
     if destroyed_by != question.created_by:
         raise PermissionDenied("You can't delete this question.")
     question.delete()
@@ -81,7 +81,7 @@ def create_choice_instances(*, choices: List[str], question: Question) -> List[C
     return instances
 
 
-def create(
+def question_create(
     *, title: str, text: str, created_by: UserModelType, choices: List[str]
 ) -> Question:
     question = create_question_instance(title=title, text=text, created_by=created_by)
@@ -89,4 +89,4 @@ def create(
         question.save()
         choice_instances = create_choice_instances(choices=choices, question=question)
         Choice.objects.bulk_create(objs=choice_instances)
-    return retrieve(question_pk=question.pk, fetch_choices=True)
+    return question_retrieve(question_pk=question.pk, fetch_choices=True)

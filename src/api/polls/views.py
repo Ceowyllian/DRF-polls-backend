@@ -35,7 +35,7 @@ class QuestionListCreateAPI(views.APIView):
     def post(self, request, *args, **kwargs):
         input = serializers.QuestionCreateSerializer(data=request.data)
         input.is_valid(raise_exception=True)
-        question = services.question.create(
+        question = services.question.question_create(
             created_by=request.user, **input.validated_data
         )
         output = serializers.QuestionDetailSerializer(
@@ -52,7 +52,7 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
         return [permissions.AllowAny()]
 
     def get(self, request, *args, **kwargs):
-        question = services.question.retrieve(
+        question = services.question.question_retrieve(
             question_pk=kwargs["pk"], fetch_choices=True
         )
         output = serializers.QuestionDetailSerializer(
@@ -61,7 +61,9 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
         return Response(data=output.data)
 
     def delete(self, request, *args, **kwargs):
-        services.question.destroy(question_pk=kwargs["pk"], destroyed_by=request.user)
+        services.question.question_destroy(
+            question_pk=kwargs["pk"], destroyed_by=request.user
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_update(self, partial=False):
@@ -69,7 +71,7 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
             data=self.request.data, partial=partial
         )
         input.is_valid(raise_exception=True)
-        question = services.question.update(
+        question = services.question.question_update(
             question_pk=self.kwargs["pk"],
             updated_by=self.request.user,
             data=input.validated_data,

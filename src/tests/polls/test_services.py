@@ -101,30 +101,32 @@ class TestCreateChoiceInstances:
 
 class TestQuestionDestroy:
     def test_destroyed_successfully(self, question, user):
-        services.question.destroy(question_pk=question.pk, destroyed_by=user)
+        services.question.question_destroy(question_pk=question.pk, destroyed_by=user)
         with pytest.raises(Question.DoesNotExist):
             Question.objects.get(id=question.pk)
 
     def test_fail_question_does_not_exist(self, question, user):
         question.delete()
         with pytest.raises(Question.DoesNotExist):
-            services.question.destroy(question_pk=question.pk, destroyed_by=user)
+            services.question.question_destroy(
+                question_pk=question.pk, destroyed_by=user
+            )
 
     def test_fail_cannot_destroy_someone_elses_question(self, question, another_user):
         with pytest.raises(PermissionDenied):
-            services.question.destroy(
+            services.question.question_destroy(
                 question_pk=question.pk, destroyed_by=another_user
             )
 
 
 class TestQuestionRetrieve:
     def test_retrieved_successfully(self, question):
-        services.question.retrieve(question_pk=question.pk)
+        services.question.question_retrieve(question_pk=question.pk)
 
     def test_fail_question_does_not_exist(self, question):
         question.delete()
         with pytest.raises(Question.DoesNotExist):
-            services.question.retrieve(question_pk=question.pk)
+            services.question.question_retrieve(question_pk=question.pk)
 
 
 class TestQuestionList:
@@ -195,7 +197,7 @@ class TestQuestionUpdate:
     def test_update_successfully(self, user, question):
         updated_fields = question_dict()
 
-        services.question.update(
+        services.question.question_update(
             question_pk=question.pk, updated_by=user, data=updated_fields
         )
         question.refresh_from_db()
@@ -206,7 +208,7 @@ class TestQuestionUpdate:
     def test_fail_to_update_someone_elses_question(self, question, another_user):
         updated_fields = question_dict()
         with pytest.raises(PermissionDenied):
-            services.question.update(
+            services.question.question_update(
                 question_pk=question.pk, updated_by=another_user, data=updated_fields
             )
 
@@ -216,7 +218,7 @@ class TestQuestionUpdate:
         )
 
         with pytest.raises(ValidationError):
-            services.question.update(
+            services.question.question_update(
                 question_pk=question.pk, updated_by=user, data=updated_fields
             )
 

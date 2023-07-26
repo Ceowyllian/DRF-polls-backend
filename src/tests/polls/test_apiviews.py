@@ -51,7 +51,7 @@ class TestQuestionCreate:
             question.pk = 0
             return question
 
-        monkeypatch.setattr(services.question, "create", create_mock)
+        monkeypatch.setattr(services.question, "question_create", create_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri, data=valid_question_dict)
@@ -64,7 +64,7 @@ class TestQuestionCreate:
         def create_mock(*args, **kwargs):
             raise ValidationError("")
 
-        monkeypatch.setattr(services.question, "create", create_mock)
+        monkeypatch.setattr(services.question, "question_create", create_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri, data=invalid_question_dict)
@@ -90,7 +90,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             return question
 
-        monkeypatch.setattr(services.question, "retrieve", retrieve_mock)
+        monkeypatch.setattr(services.question, "question_retrieve", retrieve_mock)
 
         response = api_client.get(self.uri)
 
@@ -100,7 +100,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             raise Question.DoesNotExist
 
-        monkeypatch.setattr(services.question, "retrieve", retrieve_mock)
+        monkeypatch.setattr(services.question, "question_retrieve", retrieve_mock)
 
         response = api_client.get(self.uri)
 
@@ -131,7 +131,7 @@ class TestQuestionUpdate:
             question.text = updated_fields["text"]
             return question
 
-        monkeypatch.setattr(services.question, "update", update_mock)
+        monkeypatch.setattr(services.question, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data=updated_fields)
 
@@ -141,7 +141,7 @@ class TestQuestionUpdate:
         def update_mock(*args, **kwargs):
             raise ValidationError("")
 
-        monkeypatch.setattr(services.question, "update", update_mock)
+        monkeypatch.setattr(services.question, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data={"title": "", "text": None})
 
@@ -153,7 +153,7 @@ class TestQuestionUpdate:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
-        monkeypatch.setattr(services.question, "update", should_not_be_called)
+        monkeypatch.setattr(services.question, "question_update", should_not_be_called)
         response = api_client.patch(self.uri, data=updated_fields)
         assert response.status_code == 401
 
@@ -163,7 +163,7 @@ class TestQuestionUpdate:
         def update_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
 
-        monkeypatch.setattr(services.question, "update", update_mock)
+        monkeypatch.setattr(services.question, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data=updated_fields)
 
@@ -183,7 +183,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             pass
 
-        monkeypatch.setattr(services.question, "destroy", destroy_mock)
+        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -194,7 +194,7 @@ class TestQuestionDelete:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
-        monkeypatch.setattr(services.question, "destroy", should_not_be_called)
+        monkeypatch.setattr(services.question, "question_destroy", should_not_be_called)
 
         response = api_client.delete(self.uri)
         assert response.status_code == 401
@@ -205,7 +205,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
 
-        monkeypatch.setattr(services.question, "destroy", destroy_mock)
+        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -217,7 +217,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             raise Question.DoesNotExist
 
-        monkeypatch.setattr(services.question, "destroy", destroy_mock)
+        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
