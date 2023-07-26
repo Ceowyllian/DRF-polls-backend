@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from apps.polls import services
+import services
 from apps.polls.models import Question
 
 from .conftest import C, Q

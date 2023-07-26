@@ -8,7 +8,7 @@ from django.db import models, transaction
 
 from apps.common import UserModelType
 from apps.polls.models import Choice, Question, choice_set_validators
-from apps.utils.services import model_update
+from services.common import model_update
 
 User: UserModelType = get_user_model()
 
