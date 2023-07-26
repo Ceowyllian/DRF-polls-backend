@@ -3,6 +3,11 @@ from django.core.exceptions import ValidationError
 from apps.common.types import UserModelType
 from apps.polls.models import Choice, Vote
 
+__all__ = [
+    "perform_vote",
+    "cancel_vote",
+]
+
 
 def perform_vote(*, choice_pk: int, user: UserModelType):
     choice = Choice.objects.select_related("question").get(id=choice_pk)

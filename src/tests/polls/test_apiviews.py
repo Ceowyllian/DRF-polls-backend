@@ -1,8 +1,8 @@
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-import services
 from api.common import pagination
+from api.polls import views
 from apps.polls.models import Choice, Question
 
 
@@ -24,7 +24,7 @@ class TestQuestionList:
             paginator_instance.has_previous = False
             return []
 
-        monkeypatch.setattr(services.question, "question_list", question_list_mock)
+        monkeypatch.setattr(views, "question_list", question_list_mock)
         monkeypatch.setattr(
             pagination.CursorPagination, "paginate_queryset", paginate_queryset_mock
         )
@@ -51,7 +51,7 @@ class TestQuestionCreate:
             question.pk = 0
             return question
 
-        monkeypatch.setattr(services.question, "question_create", create_mock)
+        monkeypatch.setattr(views, "question_create", create_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri, data=valid_question_dict)
@@ -64,7 +64,7 @@ class TestQuestionCreate:
         def create_mock(*args, **kwargs):
             raise ValidationError("")
 
-        monkeypatch.setattr(services.question, "question_create", create_mock)
+        monkeypatch.setattr(views, "question_create", create_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri, data=invalid_question_dict)
@@ -90,7 +90,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             return question
 
-        monkeypatch.setattr(services.question, "question_retrieve", retrieve_mock)
+        monkeypatch.setattr(views, "question_retrieve", retrieve_mock)
 
         response = api_client.get(self.uri)
 
@@ -100,7 +100,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             raise Question.DoesNotExist
 
-        monkeypatch.setattr(services.question, "question_retrieve", retrieve_mock)
+        monkeypatch.setattr(views, "question_retrieve", retrieve_mock)
 
         response = api_client.get(self.uri)
 
@@ -131,7 +131,7 @@ class TestQuestionUpdate:
             question.text = updated_fields["text"]
             return question
 
-        monkeypatch.setattr(services.question, "question_update", update_mock)
+        monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data=updated_fields)
 
@@ -141,7 +141,7 @@ class TestQuestionUpdate:
         def update_mock(*args, **kwargs):
             raise ValidationError("")
 
-        monkeypatch.setattr(services.question, "question_update", update_mock)
+        monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data={"title": "", "text": None})
 
@@ -153,7 +153,7 @@ class TestQuestionUpdate:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
-        monkeypatch.setattr(services.question, "question_update", should_not_be_called)
+        monkeypatch.setattr(views, "question_update", should_not_be_called)
         response = api_client.patch(self.uri, data=updated_fields)
         assert response.status_code == 401
 
@@ -163,7 +163,7 @@ class TestQuestionUpdate:
         def update_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
 
-        monkeypatch.setattr(services.question, "question_update", update_mock)
+        monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
         response = api_client.patch(self.uri, data=updated_fields)
 
@@ -183,7 +183,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             pass
 
-        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
+        monkeypatch.setattr(views, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -194,7 +194,7 @@ class TestQuestionDelete:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
-        monkeypatch.setattr(services.question, "question_destroy", should_not_be_called)
+        monkeypatch.setattr(views, "question_destroy", should_not_be_called)
 
         response = api_client.delete(self.uri)
         assert response.status_code == 401
@@ -205,7 +205,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
 
-        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
+        monkeypatch.setattr(views, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -217,7 +217,7 @@ class TestQuestionDelete:
         def destroy_mock(*args, **kwargs):
             raise Question.DoesNotExist
 
-        monkeypatch.setattr(services.question, "question_destroy", destroy_mock)
+        monkeypatch.setattr(views, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -238,7 +238,7 @@ class TestVoteCreate:
         def perform_vote_mock(*args, **kwargs):
             pass
 
-        monkeypatch.setattr(services.vote, "perform_vote", perform_vote_mock)
+        monkeypatch.setattr(views, "perform_vote", perform_vote_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri)
@@ -249,7 +249,7 @@ class TestVoteCreate:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Vote perform service shouldn't be called!")
 
-        monkeypatch.setattr(services.vote, "perform_vote", should_not_be_called)
+        monkeypatch.setattr(views, "perform_vote", should_not_be_called)
 
         response = api_client.post(self.uri)
 
@@ -267,7 +267,7 @@ class TestVoteCreate:
                 if self.number_of_calls > 1:
                     raise ValidationError("Too many calls, lol")
 
-        monkeypatch.setattr(services.vote, "perform_vote", PerformVoteMock())
+        monkeypatch.setattr(views, "perform_vote", PerformVoteMock())
 
         api_client.force_authenticate(user)
         response_vote_first = api_client.post(self.uri)
@@ -280,7 +280,7 @@ class TestVoteCreate:
         def perform_vote_mock(*args, **kwargs):
             raise Choice.DoesNotExist
 
-        monkeypatch.setattr(services.vote, "perform_vote", perform_vote_mock)
+        monkeypatch.setattr(views, "perform_vote", perform_vote_mock)
 
         api_client.force_authenticate(user)
         response = api_client.post(self.uri)
@@ -301,7 +301,7 @@ class TestVoteDelete:
         def cancel_vote_mock(*args, **kwargs):
             pass
 
-        monkeypatch.setattr(services.vote, "cancel_vote", cancel_vote_mock)
+        monkeypatch.setattr(views, "cancel_vote", cancel_vote_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -312,7 +312,7 @@ class TestVoteDelete:
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Cancel vote service should not be called!")
 
-        monkeypatch.setattr(services.vote, "cancel_vote", should_not_be_called)
+        monkeypatch.setattr(views, "cancel_vote", should_not_be_called)
 
         response = api_client.delete(self.uri)
 
@@ -324,7 +324,7 @@ class TestVoteDelete:
         def cancel_vote_mock(*args, **kwargs):
             raise ValidationError("")
 
-        monkeypatch.setattr(services.vote, "cancel_vote", cancel_vote_mock)
+        monkeypatch.setattr(views, "cancel_vote", cancel_vote_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)
@@ -337,7 +337,7 @@ class TestVoteDelete:
         def cancel_vote_mock(*args, **kwargs):
             raise Choice.DoesNotExist
 
-        monkeypatch.setattr(services.vote, "cancel_vote", cancel_vote_mock)
+        monkeypatch.setattr(views, "cancel_vote", cancel_vote_mock)
 
         api_client.force_authenticate(user)
         response = api_client.delete(self.uri)

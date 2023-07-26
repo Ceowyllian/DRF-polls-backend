@@ -3,8 +3,17 @@ from datetime import datetime
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-import services
 from apps.polls.models import Question
+from services.polls import (
+    cancel_vote,
+    create_choice_instances,
+    create_question_instance,
+    perform_vote,
+    question_destroy,
+    question_list,
+    question_retrieve,
+    question_update,
+)
 
 from .conftest import C, Q
 
@@ -36,9 +45,7 @@ def question_with_choices(title=None, text=None, choices=None):
 class TestCreateQuestionInstance:
     def test_created_successfully(self, user):
         question_data = question_dict()
-        question = services.question.create_question_instance(
-            created_by=user, **question_data
-        )
+        question = create_question_instance(created_by=user, **question_data)
         for field, value in question_data.items():
             assert getattr(question, field) == value
 
@@ -60,16 +67,14 @@ class TestCreateQuestionInstance:
         for key, value in kwargs.items():
             question_data[key] = value
         with pytest.raises(ValidationError):
-            services.question.create_question_instance(**question_data)
+            create_question_instance(**question_data)
 
 
 class TestCreateChoiceInstances:
     def test_created_successfully(self, question):
         choices = choice_list()
 
-        instances = services.question.create_choice_instances(
-            question=question, choices=choices
-        )
+        instances = create_choice_instances(question=question, choices=choices)
 
         assert len(instances) == len(choices)
         for choice_instance in instances:
@@ -94,39 +99,33 @@ class TestCreateChoiceInstances:
     def fail(question, **kwargs):
         choices = choice_list(**kwargs)
         with pytest.raises(ValidationError):
-            services.question.create_choice_instances(
-                question=question, choices=choices
-            )
+            create_choice_instances(question=question, choices=choices)
 
 
 class TestQuestionDestroy:
     def test_destroyed_successfully(self, question, user):
-        services.question.question_destroy(question_pk=question.pk, destroyed_by=user)
+        question_destroy(question_pk=question.pk, destroyed_by=user)
         with pytest.raises(Question.DoesNotExist):
             Question.objects.get(id=question.pk)
 
     def test_fail_question_does_not_exist(self, question, user):
         question.delete()
         with pytest.raises(Question.DoesNotExist):
-            services.question.question_destroy(
-                question_pk=question.pk, destroyed_by=user
-            )
+            question_destroy(question_pk=question.pk, destroyed_by=user)
 
     def test_fail_cannot_destroy_someone_elses_question(self, question, another_user):
         with pytest.raises(PermissionDenied):
-            services.question.question_destroy(
-                question_pk=question.pk, destroyed_by=another_user
-            )
+            question_destroy(question_pk=question.pk, destroyed_by=another_user)
 
 
 class TestQuestionRetrieve:
     def test_retrieved_successfully(self, question):
-        services.question.question_retrieve(question_pk=question.pk)
+        question_retrieve(question_pk=question.pk)
 
     def test_fail_question_does_not_exist(self, question):
         question.delete()
         with pytest.raises(Question.DoesNotExist):
-            services.question.question_retrieve(question_pk=question.pk)
+            question_retrieve(question_pk=question.pk)
 
 
 class TestQuestionList:
@@ -145,7 +144,7 @@ class TestQuestionList:
                 Question.objects.create(created_by=another_user, **question_dict())
             )
 
-        results = services.question.question_list(filters={"created_by": user.username})
+        results = question_list(filters={"created_by": user.username})
 
         assert len(results) == len(expected_questions)
 
@@ -170,7 +169,7 @@ class TestQuestionList:
             **question_dict(), created_by=user, pub_date=date_after
         )
 
-        results = services.question.question_list(filters={"date_before": current_date})
+        results = question_list(filters={"date_before": current_date})
 
         assert question_before in results
         assert question_after not in results
@@ -187,7 +186,7 @@ class TestQuestionList:
             **question_dict(), created_by=user, pub_date=date_after
         )
 
-        results = services.question.question_list(filters={"date_after": current_date})
+        results = question_list(filters={"date_after": current_date})
 
         assert question_after in results
         assert question_before not in results
@@ -197,9 +196,7 @@ class TestQuestionUpdate:
     def test_update_successfully(self, user, question):
         updated_fields = question_dict()
 
-        services.question.question_update(
-            question_pk=question.pk, updated_by=user, data=updated_fields
-        )
+        question_update(question_pk=question.pk, updated_by=user, data=updated_fields)
         question.refresh_from_db()
 
         for field, value in updated_fields.items():
@@ -208,7 +205,7 @@ class TestQuestionUpdate:
     def test_fail_to_update_someone_elses_question(self, question, another_user):
         updated_fields = question_dict()
         with pytest.raises(PermissionDenied):
-            services.question.question_update(
+            question_update(
                 question_pk=question.pk, updated_by=another_user, data=updated_fields
             )
 
@@ -218,7 +215,7 @@ class TestQuestionUpdate:
         )
 
         with pytest.raises(ValidationError):
-            services.question.question_update(
+            question_update(
                 question_pk=question.pk, updated_by=user, data=updated_fields
             )
 
@@ -226,29 +223,29 @@ class TestQuestionUpdate:
 class TestPerformVote:
     def test_perform_vote_successfully(self, user, choice_a):
         assert choice_a.vote_set.count() == 0
-        services.vote.perform_vote(choice_pk=choice_a.pk, user=user)
+        perform_vote(choice_pk=choice_a.pk, user=user)
         assert choice_a.vote_set.count() == 1
 
     def test_fail_to_vote_twice_for_the_same_choice(self, user, choice_a):
-        services.vote.perform_vote(choice_pk=choice_a.pk, user=user)
+        perform_vote(choice_pk=choice_a.pk, user=user)
         with pytest.raises(ValidationError):
-            services.vote.perform_vote(choice_pk=choice_a.pk, user=user)
+            perform_vote(choice_pk=choice_a.pk, user=user)
 
     def test_fail_to_vote_twice_for_the_same_question(self, user, choice_a, choice_b):
         assert choice_a.question == choice_b.question
-        services.vote.perform_vote(choice_pk=choice_a.pk, user=user)
+        perform_vote(choice_pk=choice_a.pk, user=user)
         with pytest.raises(ValidationError):
-            services.vote.perform_vote(choice_pk=choice_b.pk, user=user)
+            perform_vote(choice_pk=choice_b.pk, user=user)
 
 
 class TestCancelVote:
     def test_cancel_vote_successfully(self, user, vote):
         choice = vote.choice
-        services.vote.cancel_vote(choice_pk=choice.pk, user=user)
+        cancel_vote(choice_pk=choice.pk, user=user)
         assert choice.vote_set.count() == 0
 
     def test_fail_user_did_not_vote(self, user, vote):
         choice = vote.choice
         vote.delete()
         with pytest.raises(ValidationError):
-            services.vote.cancel_vote(choice_pk=choice.pk, user=user)
+            cancel_vote(choice_pk=choice.pk, user=user)

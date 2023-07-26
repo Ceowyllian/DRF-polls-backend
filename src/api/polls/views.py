@@ -2,10 +2,18 @@ from django.http import Http404
 from rest_framework import permissions, status, views
 from rest_framework.response import Response
 
-import services
 from api.common.pagination import CursorPagination, get_paginated_response
 from api.polls import serializers
 from apps.polls.models import Choice, Question
+from services.polls import (
+    cancel_vote,
+    perform_vote,
+    question_create,
+    question_destroy,
+    question_list,
+    question_retrieve,
+    question_update,
+)
 
 
 class QuestionListCreateAPI(views.APIView):
@@ -21,9 +29,7 @@ class QuestionListCreateAPI(views.APIView):
             partial=True,
         )
         filters_serializer.is_valid(raise_exception=True)
-        questions = services.question.question_list(
-            filters=filters_serializer.validated_data
-        )
+        questions = question_list(filters=filters_serializer.validated_data)
         return get_paginated_response(
             pagination_class=CursorPagination,
             serializer_class=serializers.QuestionListSerializer,
@@ -35,9 +41,7 @@ class QuestionListCreateAPI(views.APIView):
     def post(self, request, *args, **kwargs):
         input = serializers.QuestionCreateSerializer(data=request.data)
         input.is_valid(raise_exception=True)
-        question = services.question.question_create(
-            created_by=request.user, **input.validated_data
-        )
+        question = question_create(created_by=request.user, **input.validated_data)
         output = serializers.QuestionDetailSerializer(
             instance=question, context={"request": request}
         )
@@ -52,18 +56,14 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
         return [permissions.AllowAny()]
 
     def get(self, request, *args, **kwargs):
-        question = services.question.question_retrieve(
-            question_pk=kwargs["pk"], fetch_choices=True
-        )
+        question = question_retrieve(question_pk=kwargs["pk"], fetch_choices=True)
         output = serializers.QuestionDetailSerializer(
             instance=question, context={"request": request}
         )
         return Response(data=output.data)
 
     def delete(self, request, *args, **kwargs):
-        services.question.question_destroy(
-            question_pk=kwargs["pk"], destroyed_by=request.user
-        )
+        question_destroy(question_pk=kwargs["pk"], destroyed_by=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_update(self, partial=False):
@@ -71,7 +71,7 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
             data=self.request.data, partial=partial
         )
         input.is_valid(raise_exception=True)
-        question = services.question.question_update(
+        question = question_update(
             question_pk=self.kwargs["pk"],
             updated_by=self.request.user,
             data=input.validated_data,
@@ -102,11 +102,11 @@ class VoteCreateDeleteAPI(views.APIView):
         return [permissions.AllowAny()]
 
     def post(self, request, *args, **kwargs):
-        services.vote.perform_vote(choice_pk=kwargs["pk"], user=request.user)
+        perform_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
-        services.vote.cancel_vote(choice_pk=kwargs["pk"], user=request.user)
+        cancel_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def handle_exception(self, exc):

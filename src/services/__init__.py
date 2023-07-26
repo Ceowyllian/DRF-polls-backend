@@ -1,1 +1,1 @@
-from . import question, vote
+from . import polls
