@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.polls.apiviews import (
+from api.polls.views import (
     QuestionListCreateAPI,
     QuestionRetrieveUpdateDeleteAPI,
     VoteCreateDeleteAPI,
