@@ -61,13 +61,6 @@ jobs:
         uses: isort/isort-action@master
 
       - name: Run tests with coverage
-        env:
-          DB_ENGINE: django.db.backends.postgresql_psycopg2
-          DB_HOST: localhost
-          DB_NAME: postgres
-          DB_PASSWORD: postgres
-          DB_PORT: 5432
-          DB_USER: postgres
         run: |
           python src/manage.py migrate
           coverage run -m pytest src/tests
