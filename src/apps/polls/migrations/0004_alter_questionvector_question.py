@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('polls', '0003_create_trigger'),
+        ('polls', '0002_questionvector_and_more'),
     ]
 
     operations = [
