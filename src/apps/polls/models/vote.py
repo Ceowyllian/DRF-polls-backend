@@ -2,19 +2,28 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.common.models import BaseModel
 from apps.common.types import UserModelType
-
-from . import Choice, Question
 
 User: UserModelType = get_user_model()
 
 
-class Vote(models.Model):
-    voted_by = models.ForeignKey(User, on_delete=models.CASCADE)
+class Vote(BaseModel):
+    voted_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
     date_voted = models.DateTimeField(auto_now=True, editable=False)
-
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=False)
-    choice = models.ForeignKey(Choice, on_delete=models.CASCADE, null=False)
+    question = models.ForeignKey(
+        "polls.Question",
+        on_delete=models.CASCADE,
+        null=False,
+    )
+    choice = models.ForeignKey(
+        "polls.Choice",
+        on_delete=models.CASCADE,
+        null=False,
+    )
 
     class Meta:
         constraints = [

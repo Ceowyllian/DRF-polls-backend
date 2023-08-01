@@ -1,6 +1,4 @@
-import uuid
-
-from model_utils.models import TimeStampedModel, UUIDField
+from model_utils.models import TimeStampedModel
 
 __all__ = [
     "BaseModel",
@@ -8,7 +6,7 @@ __all__ = [
 
 
 class BaseModel(TimeStampedModel):
-    id = UUIDField(default=uuid.uuid4)
+    # id = UUIDField(default=uuid.uuid4)
 
     class Meta:
         abstract = True

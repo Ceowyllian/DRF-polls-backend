@@ -3,6 +3,8 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
+from apps.common.models import BaseModel
+
 
 class ChoiceConfig:
     TEXT_MIN_LEN = 1
@@ -45,19 +47,21 @@ choice_set_validators = (
 )
 
 
-class Choice(models.Model):
+class Choice(BaseModel):
     text = models.CharField(
-        max_length=ChoiceConfig.TEXT_MAX_LEN, validators=text_validators
+        max_length=ChoiceConfig.TEXT_MAX_LEN,
+        validators=text_validators,
     )
-
-    from .question import Question
-
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        "polls.Question",
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         constraints = (
             UniqueConstraint(
-                name="no identical choices for question", fields=("text", "question")
+                name="no identical choices for question",
+                fields=("text", "question"),
             ),
         )
 
