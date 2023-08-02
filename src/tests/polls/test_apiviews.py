@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 
 from api.common import pagination
 from api.polls import views
-from apps.polls.models import Choice, Question
+from db.polls.models import Choice, Question
 
 
 class TestQuestionList:

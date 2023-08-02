@@ -2,8 +2,8 @@ import pytest
 from django.utils.crypto import get_random_string
 from rest_framework.test import APIClient
 
-from apps.common.types import UserModelType
-from apps.polls.models import Choice, ChoiceConfig, Question, QuestionConfig, Vote
+from db.common.types import UserModelType
+from db.polls.models import Choice, ChoiceConfig, Question, QuestionConfig, Vote
 
 
 @pytest.fixture()

@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
-from apps.common.types import UserModelType
-from apps.polls.models import Choice, Question, choice_set_validators
+from db.common.types import UserModelType
+from db.polls.models import Choice, Question, choice_set_validators
 from services.common import model_update
 
 __all__ = [

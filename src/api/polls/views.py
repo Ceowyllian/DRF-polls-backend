@@ -11,7 +11,7 @@ from api.polls.serializers import (
     QuestionListSerializer,
     QuestionUpdateSerializer,
 )
-from apps.polls.models import Choice, Question
+from db.polls.models import Choice, Question
 from services.polls import (
     QuestionFilter,
     cancel_vote,

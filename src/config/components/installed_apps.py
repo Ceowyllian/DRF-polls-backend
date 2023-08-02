@@ -1,6 +1,6 @@
 LOCAL_APPS = [
-    "apps.users.apps.UsersConfig",
-    "apps.polls.apps.PollsConfig",
+    "db.users.apps.UsersConfig",
+    "db.polls.apps.PollsConfig",
 ]
 
 THIRD_PARTY_APPS = [

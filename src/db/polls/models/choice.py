@@ -3,7 +3,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
-from apps.common.models import BaseModel
+from db.common.models import BaseModel
 
 
 class ChoiceConfig:

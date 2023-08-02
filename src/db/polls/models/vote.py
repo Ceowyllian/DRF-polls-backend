@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.common.models import BaseModel
-from apps.common.types import UserModelType
+from db.common.models import BaseModel
+from db.common.types import UserModelType
 
 User: UserModelType = get_user_model()
 

@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from apps.polls.models import Question
+from db.polls.models import Question
 from services.polls import (
     cancel_vote,
     create_choice_instances,
