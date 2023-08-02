@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 
-from db.common.models import BaseModel
+from db.common.models import BaseModel, WithOwnerMixin
 from db.common.types import UserModelType
 
 User: UserModelType = get_user_model()
@@ -42,7 +42,10 @@ text_validators = (
 )
 
 
-class Question(BaseModel):
+class Question(
+    WithOwnerMixin,
+    BaseModel,
+):
     title = models.CharField(
         max_length=QuestionConfig.TITLE_MAX_LEN,
         validators=title_validators,
@@ -50,11 +53,6 @@ class Question(BaseModel):
     text = models.CharField(
         max_length=QuestionConfig.TEXT_MAX_LEN,
         validators=text_validators,
-    )
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        editable=False,
     )
 
     def __str__(self):

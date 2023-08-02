@@ -12,7 +12,7 @@ __all__ = [
 def perform_vote(*, choice_pk: int, user: UserModelType):
     choice = Choice.objects.select_related("question").get(id=choice_pk)
 
-    vote = Vote(choice=choice, question=choice.question, voted_by=user)
+    vote = Vote(choice=choice, question=choice.question, owner=user)
     vote.full_clean()
     vote.save()
 
@@ -20,6 +20,6 @@ def perform_vote(*, choice_pk: int, user: UserModelType):
 def cancel_vote(*, choice_pk: int, user: UserModelType):
     choice = Choice.objects.get(id=choice_pk)
 
-    number_deleted, _ = Vote.objects.filter(choice=choice, voted_by=user).delete()
+    number_deleted, _ = Vote.objects.filter(choice=choice, owner=user).delete()
     if number_deleted == 0:
         raise ValidationError("You didn't vote for this choice.")

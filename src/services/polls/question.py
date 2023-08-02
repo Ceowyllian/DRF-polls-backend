@@ -22,8 +22,8 @@ User: UserModelType = get_user_model()
 
 
 class QuestionFilter(django_filters.FilterSet):
-    created_by__username = django_filters.CharFilter(
-        field_name="created_by__username",
+    owner__username = django_filters.CharFilter(
+        field_name="owner__username",
         lookup_expr="iexact",
     )
     created_before = django_filters.DateTimeFilter(
@@ -48,7 +48,7 @@ def question_update(
     *, question_pk: int, updated_by: UserModelType, data: Dict[str, Any]
 ) -> Question:
     question = Question.objects.get(pk=question_pk)
-    if updated_by != question.created_by:
+    if updated_by != question.owner:
         raise PermissionDenied("You can't edit this question.")
 
     question, has_updated = model_update(
@@ -59,7 +59,7 @@ def question_update(
 
 def question_destroy(*, question_pk: int, destroyed_by: UserModelType):
     question = Question.objects.get(pk=question_pk)
-    if destroyed_by != question.created_by:
+    if destroyed_by != question.owner:
         raise PermissionDenied("You can't delete this question.")
     question.delete()
 
@@ -67,7 +67,7 @@ def question_destroy(*, question_pk: int, destroyed_by: UserModelType):
 def create_question_instance(
     *, title: str, text: str, created_by: UserModelType
 ) -> Question:
-    question = Question(title=title, text=text, created_by=created_by)
+    question = Question(title=title, text=text, owner=created_by)
     question.full_clean()
     return question
 

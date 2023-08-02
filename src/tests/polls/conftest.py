@@ -45,7 +45,7 @@ def question(user) -> Question:
     """Question, created by fixture `user`."""
 
     return Question.objects.create(
-        title="Test question", text="Test question text", created_by=user
+        title="Test question", text="Test question text", owner=user
     )
 
 
@@ -64,9 +64,7 @@ def choice_b(question):
 @pytest.fixture()
 def vote(user, choice_a):
     """Fixture `user` voted for fixture `choice_a`"""
-    return Vote.objects.create(
-        choice=choice_a, question=choice_a.question, voted_by=user
-    )
+    return Vote.objects.create(choice=choice_a, question=choice_a.question, owner=user)
 
 
 class Q:

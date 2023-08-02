@@ -46,7 +46,7 @@ class TestQuestionCreate:
         self, monkeypatch, api_client, user, valid_question_dict
     ):
         def create_mock(**kwargs):
-            question = Question(title="blablabla", text="blablabla", created_by=user)
+            question = Question(title="blablabla", text="blablabla", owner=user)
             import uuid
 
             question.pk = uuid.uuid4()
