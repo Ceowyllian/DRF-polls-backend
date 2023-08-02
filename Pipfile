@@ -10,6 +10,7 @@ django-split-settings="1.2.0"
 psycopg2-binary="2.9.6"
 Faker="18.10.1"
 pytest-django="4.5.2"
+drf-spectacular="0.26.4"
 
 [dev-packages]
 flake8="6.0.0"
