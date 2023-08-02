@@ -1,0 +1,1 @@
+SCHEMA_TAG_POLLS = "Polls"
