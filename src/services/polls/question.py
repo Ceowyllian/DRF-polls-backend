@@ -27,11 +27,12 @@ class QuestionFilter(django_filters.FilterSet):
     created_by = django_filters.CharFilter(
         field_name="created_by__username", lookup_expr="iexact"
     )
-    date = django_filters.DateFromToRangeFilter(field_name="pub_date")
+    date_before = django_filters.DateFilter(field_name="created", lookup_expr="lte")
+    date_after = django_filters.DateFilter(field_name="created", lookup_expr="gte")
 
     class Meta:
         model = Question
-        fields = ("created_by", "pub_date")
+        fields = ["created_by", "date_before", "date_after"]
 
 
 def question_list(*, filters: Dict[str, Any] = None) -> models.QuerySet[Question]:

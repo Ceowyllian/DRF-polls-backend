@@ -163,10 +163,10 @@ class TestQuestionList:
         date_after = datetime(year=2022, month=12, day=10)
 
         question_before = Question.objects.create(
-            **question_dict(), created_by=user, pub_date=date_before
+            **question_dict(), created_by=user, created=date_before
         )
         question_after = Question.objects.create(
-            **question_dict(), created_by=user, pub_date=date_after
+            **question_dict(), created_by=user, created=date_after
         )
 
         results = question_list(filters={"date_before": current_date})
@@ -180,10 +180,10 @@ class TestQuestionList:
         date_after = datetime(year=2022, month=12, day=10)
 
         question_before = Question.objects.create(
-            **question_dict(), created_by=user, pub_date=date_before
+            **question_dict(), created_by=user, created=date_before
         )
         question_after = Question.objects.create(
-            **question_dict(), created_by=user, pub_date=date_after
+            **question_dict(), created_by=user, created=date_after
         )
 
         results = question_list(filters={"date_after": current_date})

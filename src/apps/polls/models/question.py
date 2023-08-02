@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
-from django.utils import timezone
 
 from apps.common.models import BaseModel
 from apps.common.types import UserModelType
@@ -56,11 +55,6 @@ class Question(BaseModel):
         User,
         on_delete=models.CASCADE,
         editable=False,
-    )
-    pub_date = models.DateTimeField(
-        default=timezone.now,
-        editable=False,
-        verbose_name="date published",
     )
 
     def __str__(self):
