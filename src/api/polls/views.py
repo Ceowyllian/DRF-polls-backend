@@ -1,10 +1,12 @@
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, views, viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from api.common.schema_tags import SCHEMA_TAG_POLLS
 from api.polls.serializers import (
     QuestionCreateSerializer,
     QuestionDetailSerializer,
@@ -27,6 +29,36 @@ __all__ = [
 ]
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="Paginated list of questions",
+        responses={200: QuestionListSerializer(many=True)},
+    ),
+    create=extend_schema(
+        summary="Create a question",
+        request=QuestionCreateSerializer,
+        responses={201: QuestionDetailSerializer},
+    ),
+    retrieve=extend_schema(
+        summary="Single question with choices",
+        responses={200: QuestionDetailSerializer},
+    ),
+    update=extend_schema(
+        summary="Update all fields of the question",
+        request=QuestionUpdateSerializer,
+        responses={200: QuestionDetailSerializer},
+    ),
+    partial_update=extend_schema(
+        summary="Update some fields of the question",
+        request=QuestionUpdateSerializer(partial=True),
+        responses={200: QuestionDetailSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Delete the question",
+        responses={204: None},
+    ),
+)
+@extend_schema(tags=[SCHEMA_TAG_POLLS])
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.select_related("created_by").prefetch_related(
         "choice_set"
@@ -91,13 +123,16 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return super().handle_exception(exc)
 
 
+@extend_schema(tags=[SCHEMA_TAG_POLLS])
 class VoteCreateDeleteAPI(views.APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    @extend_schema(summary="Perform vote", responses={201: None})
     def post(self, request, *args, **kwargs):
         perform_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_201_CREATED)
 
+    @extend_schema(summary="Cancel vote", responses={204: None})
     def delete(self, request, *args, **kwargs):
         cancel_vote(choice_pk=kwargs["pk"], user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
