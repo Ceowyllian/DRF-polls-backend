@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable
 
 import django_filters
 from django.contrib.auth import get_user_model
@@ -72,7 +72,14 @@ def create_question_instance(
     return question
 
 
-def create_choice_instances(*, choices: List[str], question: Question) -> List[Choice]:
+def validate_choices(choices: Iterable[str]):
+    for validator in choice_set_validators:
+        validator(choices)
+
+
+def create_choice_instances(
+    *, choices: Iterable[str], question: Question
+) -> Iterable[Choice]:
     for validator in choice_set_validators:
         validator(choices)
 
@@ -83,7 +90,7 @@ def create_choice_instances(*, choices: List[str], question: Question) -> List[C
 
 
 def question_create(
-    *, title: str, text: str, created_by: UserModelType, choices: List[str]
+    *, title: str, text: str, created_by: UserModelType, choices: Iterable[str]
 ) -> Question:
     question = create_question_instance(title=title, text=text, created_by=created_by)
     with transaction.atomic():
@@ -91,3 +98,13 @@ def question_create(
         choice_instances = create_choice_instances(choices=choices, question=question)
         Choice.objects.bulk_create(objs=choice_instances)
     return Question.objects.get(question_pk=question.pk, fetch_choices=True)
+
+
+def add_choices(*, question_pk: Any, choices: Iterable[str]) -> Iterable[Choice]:
+    question = Question.objects.get(pk=question_pk)
+    existing_choices = {choice.text for choice in question.choice_set.all()}
+    validate_choices(existing_choices | set(choices))
+    choice_instances = create_choice_instances(choices=choices, question=question)
+    for choice in choice_instances:
+        choice.save()
+    return choice_instances
