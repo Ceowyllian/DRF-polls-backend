@@ -52,7 +52,7 @@ class QuestionDetailSerializer(HyperlinkedModelSerializer):
         }
 
     class ChoiceSerializer(serializers.Serializer):
-        pk = serializers.IntegerField()
+        pk = serializers.UUIDField()
         text = serializers.CharField()
 
     choices = ChoiceSerializer(many=True, source="choice_set")
