@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
@@ -10,8 +8,6 @@ from services.polls import (
     create_question_instance,
     perform_vote,
     question_destroy,
-    question_list,
-    question_retrieve,
     question_update,
 )
 
@@ -116,80 +112,6 @@ class TestQuestionDestroy:
     def test_fail_cannot_destroy_someone_elses_question(self, question, another_user):
         with pytest.raises(PermissionDenied):
             question_destroy(question_pk=question.pk, destroyed_by=another_user)
-
-
-class TestQuestionRetrieve:
-    def test_retrieved_successfully(self, question):
-        question_retrieve(question_pk=question.pk)
-
-    def test_fail_question_does_not_exist(self, question):
-        question.delete()
-        with pytest.raises(Question.DoesNotExist):
-            question_retrieve(question_pk=question.pk)
-
-
-class TestQuestionList:
-    def test_filter_by_created_by(self, user, another_user):
-        # Questions that MUST appear in the results
-        expected_questions = set()
-        for _ in range(3):
-            expected_questions.add(
-                Question.objects.create(created_by=user, **question_dict())
-            )
-
-        # Questions that SHOULD NEVER appear in the results
-        unsuitable_questions = set()
-        for _ in range(3):
-            unsuitable_questions.add(
-                Question.objects.create(created_by=another_user, **question_dict())
-            )
-
-        results = question_list(filters={"created_by": user.username})
-
-        assert len(results) == len(expected_questions)
-
-        for question in results:
-            assert question.created_by == user
-
-        for question in expected_questions:
-            assert question in results
-
-        for question in unsuitable_questions:
-            assert question not in results
-
-    def test_filter_by_date_before(self, user):
-        date_before = datetime(year=2022, month=12, day=4)
-        current_date = "2022-12-9"
-        date_after = datetime(year=2022, month=12, day=10)
-
-        question_before = Question.objects.create(
-            **question_dict(), created_by=user, created=date_before
-        )
-        question_after = Question.objects.create(
-            **question_dict(), created_by=user, created=date_after
-        )
-
-        results = question_list(filters={"date_before": current_date})
-
-        assert question_before in results
-        assert question_after not in results
-
-    def test_filter_by_date_after(self, user):
-        date_before = datetime(year=2022, month=12, day=4)
-        current_date = "2022-12-9"
-        date_after = datetime(year=2022, month=12, day=10)
-
-        question_before = Question.objects.create(
-            **question_dict(), created_by=user, created=date_before
-        )
-        question_after = Question.objects.create(
-            **question_dict(), created_by=user, created=date_after
-        )
-
-        results = question_list(filters={"date_after": current_date})
-
-        assert question_after in results
-        assert question_before not in results
 
 
 class TestQuestionUpdate:

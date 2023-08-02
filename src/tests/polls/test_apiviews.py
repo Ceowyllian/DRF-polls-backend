@@ -16,15 +16,12 @@ class TestQuestionList:
     uri = "/api/polls/questions/"
 
     def test_200_questions_exist(self, monkeypatch, api_client):
-        def question_list_mock(*args, **kwargs):
-            return []
-
         def paginate_queryset_mock(paginator_instance, *args, **kwargs):
             paginator_instance.has_next = False
             paginator_instance.has_previous = False
-            return []
+            return Question.objects.none()
 
-        monkeypatch.setattr(views, "question_list", question_list_mock)
+        monkeypatch.setattr(views.QuestionViewSet, "queryset", Question.objects.none())
         monkeypatch.setattr(
             pagination.CursorPagination, "paginate_queryset", paginate_queryset_mock
         )
@@ -90,8 +87,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             return question
 
-        monkeypatch.setattr(views, "question_retrieve", retrieve_mock)
-
+        monkeypatch.setattr(views.QuestionViewSet, "get_object", retrieve_mock)
         response = api_client.get(self.uri)
 
         assert response.status_code == 200
@@ -100,7 +96,7 @@ class TestQuestionRetrieve:
         def retrieve_mock(*args, **kwargs):
             raise Question.DoesNotExist
 
-        monkeypatch.setattr(views, "question_retrieve", retrieve_mock)
+        monkeypatch.setattr(views.QuestionViewSet, "get_object", retrieve_mock)
 
         response = api_client.get(self.uri)
 
