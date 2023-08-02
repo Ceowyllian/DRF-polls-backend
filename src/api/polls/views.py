@@ -1,92 +1,89 @@
 from django.http import Http404
-from rest_framework import permissions, status, views
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, views, viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from api.common.pagination import CursorPagination, get_paginated_response
-from api.polls import serializers
+from api.polls.serializers import (
+    QuestionCreateSerializer,
+    QuestionDetailSerializer,
+    QuestionListSerializer,
+    QuestionUpdateSerializer,
+)
 from apps.polls.models import Choice, Question
 from services.polls import (
+    QuestionFilter,
     cancel_vote,
     perform_vote,
     question_create,
     question_destroy,
-    question_list,
-    question_retrieve,
     question_update,
 )
 
+__all__ = [
+    "QuestionViewSet",
+    "VoteCreateDeleteAPI",
+]
 
-class QuestionListCreateAPI(views.APIView):
-    def get_permissions(self):
-        method = self.request.method
-        if method == "POST":
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
 
-    def get(self, request, *args, **kwargs):
-        filters_serializer = serializers.QuestionFilterSerializer(
-            data=request.query_params,
-            partial=True,
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = Question.objects.select_related("created_by").prefetch_related(
+        "choice_set"
+    )
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+    filterset_class = QuestionFilter
+    search_fields = [
+        "title",
+        "text",
+        "created_by__username",
+    ]
+    ordering = "-created"
+    ordering_fields = [
+        "title",
+        "text",
+        "created_by__username",
+        "created",
+        "modified",
+    ]
+
+    def get_serializer_class(self):
+        return {
+            "retrieve": QuestionDetailSerializer,
+            "list": QuestionListSerializer,
+        }[self.action]
+
+    def create(self, request, *args, **kwargs):
+        input_ = QuestionCreateSerializer(data=request.data)
+        input_.is_valid(raise_exception=True)
+        question = question_create(created_by=request.user, **input_.validated_data)
+        output = QuestionDetailSerializer(
+            instance=question, context=self.get_serializer_context()
         )
-        filters_serializer.is_valid(raise_exception=True)
-        questions = question_list(filters=filters_serializer.validated_data)
-        return get_paginated_response(
-            pagination_class=CursorPagination,
-            serializer_class=serializers.QuestionListSerializer,
-            queryset=questions,
-            request=request,
-            view=self,
+        return Response(output.data, status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", True)
+        input_ = QuestionUpdateSerializer(data=request.data, partial=partial)
+        input_.is_valid(raise_exception=True)
+        question = question_update(
+            question_pk=kwargs["pk"],
+            updated_by=request.user,
+            data=input_.validated_data,
         )
-
-    def post(self, request, *args, **kwargs):
-        input = serializers.QuestionCreateSerializer(data=request.data)
-        input.is_valid(raise_exception=True)
-        question = question_create(created_by=request.user, **input.validated_data)
-        output = serializers.QuestionDetailSerializer(
-            instance=question, context={"request": request}
+        output = QuestionDetailSerializer(
+            instance=question, context=self.get_serializer_context()
         )
-        return Response(data=output.data, status=status.HTTP_201_CREATED)
+        return Response(output.data, status.HTTP_200_OK)
 
-
-class QuestionRetrieveUpdateDeleteAPI(views.APIView):
-    def get_permissions(self):
-        method = self.request.method
-        if method in ("PUT", "PATCH", "DELETE"):
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-
-    def get(self, request, *args, **kwargs):
-        question = question_retrieve(question_pk=kwargs["pk"], fetch_choices=True)
-        output = serializers.QuestionDetailSerializer(
-            instance=question, context={"request": request}
-        )
-        return Response(data=output.data)
-
-    def delete(self, request, *args, **kwargs):
+    def destroy(self, request, *args, **kwargs):
         question_destroy(question_pk=kwargs["pk"], destroyed_by=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_update(self, partial=False):
-        input = serializers.QuestionUpdateSerializer(
-            data=self.request.data, partial=partial
-        )
-        input.is_valid(raise_exception=True)
-        question = question_update(
-            question_pk=self.kwargs["pk"],
-            updated_by=self.request.user,
-            data=input.validated_data,
-        )
-        output = serializers.QuestionDetailSerializer(
-            instance=question, context={"request": self.request}
-        )
-
-        return Response(data=output.data)
-
-    def patch(self, request, *args, **kwargs):
-        return self.perform_update(partial=True)
-
-    def put(self, request, *args, **kwargs):
-        return self.perform_update(partial=False)
 
     def handle_exception(self, exc):
         if isinstance(exc, Question.DoesNotExist):
@@ -95,11 +92,7 @@ class QuestionRetrieveUpdateDeleteAPI(views.APIView):
 
 
 class VoteCreateDeleteAPI(views.APIView):
-    def get_permissions(self):
-        method = self.request.method
-        if method in ("POST", "DELETE"):
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def post(self, request, *args, **kwargs):
         perform_vote(choice_pk=kwargs["pk"], user=request.user)

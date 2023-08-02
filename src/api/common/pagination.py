@@ -19,7 +19,6 @@ def get_paginated_response(pagination_class, serializer_class, queryset, request
 
 
 class CursorPagination(_CursorPagination):
-    ordering = "pub_date"
     page_size = 10
 
     def get_paginated_response(self, data):

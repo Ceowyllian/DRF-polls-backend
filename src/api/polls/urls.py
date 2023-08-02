@@ -1,17 +1,12 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import SimpleRouter
 
-from api.polls.views import (
-    QuestionListCreateAPI,
-    QuestionRetrieveUpdateDeleteAPI,
-    VoteCreateDeleteAPI,
-)
+from api.polls.views import QuestionViewSet, VoteCreateDeleteAPI
+
+questions_router = SimpleRouter()
+questions_router.register(r"questions", QuestionViewSet)
 
 urlpatterns = [
-    path("questions/", QuestionListCreateAPI.as_view()),
-    path(
-        "questions/<int:pk>/",
-        QuestionRetrieveUpdateDeleteAPI.as_view(),
-        name="question-detail",
-    ),
-    path("votes/<int:pk>/", VoteCreateDeleteAPI.as_view(), name="vote"),
+    path(r"", include(questions_router.urls)),
+    path(r"votes/<int:pk>/", VoteCreateDeleteAPI.as_view(), name="vote"),
 ]
