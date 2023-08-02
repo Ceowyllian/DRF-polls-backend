@@ -8,5 +8,5 @@ questions_router.register(r"questions", QuestionViewSet)
 
 urlpatterns = [
     path(r"", include(questions_router.urls)),
-    path(r"votes/<int:pk>/", VoteCreateDeleteAPI.as_view(), name="vote"),
+    path(r"votes/<uuid:pk>/", VoteCreateDeleteAPI.as_view(), name="vote"),
 ]

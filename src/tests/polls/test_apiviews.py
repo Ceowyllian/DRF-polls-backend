@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
@@ -45,7 +47,9 @@ class TestQuestionCreate:
     ):
         def create_mock(**kwargs):
             question = Question(title="blablabla", text="blablabla", created_by=user)
-            question.pk = 0
+            import uuid
+
+            question.pk = uuid.uuid4()
             return question
 
         monkeypatch.setattr(views, "question_create", create_mock)
@@ -228,7 +232,7 @@ class TestVoteCreate:
     HTTP authorization IS required.
     """
 
-    uri = "/api/polls/votes/123/"
+    uri = f"/api/polls/votes/{uuid.uuid4()}/"
 
     def test_201_vote_successfully(self, monkeypatch, api_client, user):
         def perform_vote_mock(*args, **kwargs):
@@ -291,7 +295,7 @@ class TestVoteDelete:
     HTTP authorization IS required.
     """
 
-    uri = "/api/polls/votes/123/"
+    uri = f"/api/polls/votes/{uuid.uuid4()}/"
 
     def test_204_cancel_vote_successfully(self, monkeypatch, api_client, user):
         def cancel_vote_mock(*args, **kwargs):
