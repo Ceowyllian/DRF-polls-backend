@@ -19,16 +19,15 @@ ___
 ## Table of contents
 
 <!-- TOC -->
-
-* [Table of contents](#table-of-contents)
-* [System requirements](#system-requirements)
-* [Installation](#installation)
+* [DRF polls backend](#drf-polls-backend)
+  * [Table of contents](#table-of-contents)
+  * [System requirements](#system-requirements)
+  * [Installation](#installation)
     * [1 Create a DB and a user for the django project](#1-create-a-db-and-a-user-for-the-django-project)
     * [2 Clone this repo and install the dependencies](#2-clone-this-repo-and-install-the-dependencies)
     * [3 Configure the environment](#3-configure-the-environment)
     * [4 Create a DB schema and an administrator user](#4-create-a-db-schema-and-an-administrator-user)
-* [Run the local server](#run-the-local-server)
-
+    * [5 Run the local server](#5-run-the-local-server)
 <!-- TOC -->
 
 ## System requirements
