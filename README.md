@@ -22,12 +22,13 @@ ___
 * [DRF polls backend](#drf-polls-backend)
   * [Table of contents](#table-of-contents)
   * [System requirements](#system-requirements)
-  * [Installation](#installation)
+  * [Quick start](#quick-start)
     * [1 Create a DB and a user for the django project](#1-create-a-db-and-a-user-for-the-django-project)
     * [2 Clone this repo and install the dependencies](#2-clone-this-repo-and-install-the-dependencies)
     * [3 Configure the environment](#3-configure-the-environment)
     * [4 Create a DB schema and an administrator user](#4-create-a-db-schema-and-an-administrator-user)
     * [5 Run the local server](#5-run-the-local-server)
+    * [6 Go to the page with OpenAPI documentation - Swagger UI](#6-go-to-the-page-with-openapi-documentation---swagger-ui)
 <!-- TOC -->
 
 ## System requirements
@@ -35,7 +36,7 @@ ___
 - Python 3.11.4 or higher
 - PostgreSQL 15 or higher
 
-## Installation
+## Quick start
 
 All the steps described below were performed on a computer with `Windows 10` installed. If you are not using `Windows`,
 you may need to replace some shell commands with those that match your OS.
@@ -104,5 +105,9 @@ Create an admin user using the following command:
 ### 5 Run the local server
 
 ```shell
-python manage.py runserver
+python manage.py runserver 127.0.0.1:8000
 ```
+
+### 6 Go to the page with OpenAPI documentation - [Swagger UI](http://127.0.0.1:8000/oas3/schema/swagger-ui/)
+
+http://127.0.0.1:8000/oas3/schema/swagger-ui/
