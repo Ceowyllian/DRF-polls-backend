@@ -3,8 +3,8 @@ import uuid
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from api.common import pagination
 from api.polls import views
+from core import pagination
 from db.polls.models import Choice, Question
 
 
