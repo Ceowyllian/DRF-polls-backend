@@ -78,7 +78,7 @@ pip install -r requirements.txt -r requirements-dev.txt
 ```
 
 ### 3 Configure the environment
-Create the `.env` file in the directory, where the `manage.py` file is
+Create the `.env` file in the `src` directory, where the `manage.py` file is
 located. Here are the required environment variables:
 
 ```dotenv
