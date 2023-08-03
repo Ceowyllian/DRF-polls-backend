@@ -1,6 +1,7 @@
 # DRF polls backend
 
 [![](https://github.com/Ceowyllian/DRF-polls-backend/actions/workflows/django.yml/badge.svg)](https://github.com/Ceowyllian/DRF-polls-backend/actions/workflows/django.yml)
+[![](https://github.com/Ceowyllian/DRF-polls-backend/actions/workflows/check-commit-message.yml/badge.svg)](https://github.com/Ceowyllian/DRF-polls-backend/actions/workflows/check-commit-message.yml)
 [![](https://codecov.io/gh/Ceowyllian/DRF-polls-backend/branch/master/graph/badge.svg?token=DDAU4GIT09)](https://codecov.io/gh/Ceowyllian/DRF-polls-backend)
 [![](https://img.shields.io/github/license/Ceowyllian/DRF-polls-backend?color=blue&label=License)](https://github.com/Ceowyllian/DRF-polls-backend/blob/master/LICENSE)
 [![](https://img.shields.io/github/pipenv/locked/dependency-version/Ceowyllian/DRF-polls-backend/django?label=Django)](https://www.djangoproject.com)
@@ -32,8 +33,8 @@ ___
 
 ## System requirements
 
-- Python 3.10.2 or higher
-- PostgreSQL 14 or higher
+- Python 3.11.4 or higher
+- PostgreSQL 15 or higher
 
 ## Installation
 
@@ -60,8 +61,7 @@ GRANT ALL PRIVILEGES ON DATABASE django_polls_db TO django_polls_user;
 
 ### 2 Clone this repo and install the dependencies
 
-Clone branch `master` and switch to the project directory (make sure you have `git` and `python` installed in
-your `PATH` variable):
+Clone branch `master` and switch to the project directory:
 
 ```shell
 git clone https://github.com/Ceowyllian/DRF-polls-backend.git
@@ -73,54 +73,37 @@ Create and activate virtual environment. Install all the necessary packages usin
 ```shell
 python -m venv .\venv
 venv\Scripts\activate
-pip install -r requirements\base.txt -r requirements\local.txt
+cd src
+pip install -r requirements.txt -r requirements-dev.txt
 ```
 
 ### 3 Configure the environment
+Create the `.env` file in the directory, where the `manage.py` file is
+located. Here are the required environment variables:
 
-To specify the environment variables simply create the `.env` file in the root directory, where the `manage.py` file is
-located. Here is the list of all the variables:
+```dotenv
+DB_URL=postgres://username:password@host:port/db_name
+SECRET_KEY=PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN
+DJANGO_DEBUG=False
+```
 
-| Variable                    | Example (plain text)                             | Default (Python value)         |
-|-----------------------------|--------------------------------------------------|--------------------------------|
-| DB_URL                      | `postgres://username:password@host:port/db_name` | `"postgres://django_polls_db"` |
-| **SECRET_KEY** - necessary  | `PoTFPuiCcapnlgeYiKHMDY29SAlUj4lWkYBKOtztVDN`    | `None`                         |
-| DJANGO_DEBUG                | `False`                                          | `False`                        |
-| CORS_ALLOWED_ORIGINS        | `http://localhost:8080, https://example.com `    | `[]`                           |
-| SECURE_CONTENT_TYPE_NOSNIFF | `True`                                           | `True`                         |
-
-For more information, read the following articles:
-
-- [Django "settings.py" file](https://docs.djangoproject.com/en/4.1/topics/settings/)
-- ["django-environ" package](https://django-environ.readthedocs.io/en/latest/index.html)
-  and [how to use multiple ".env" files](https://django-environ.readthedocs.io/en/latest/index.html)
+See the [".env.template"](/src/.env.template) file for a complete list.
 
 ### 4 Create a DB schema and an administrator user
 
-Run manage.py commands to make migrations and create all the necessary DB tables:
+Run manage.py command to create all the necessary DB tables:
 
 ```shell
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-Create an admin user using the following command (you will need to choose an email with username and create password):
-
+Create an admin user using the following command:
 ```shell
  python manage.py createsuperuser
 ```
 
-Now the application is ready to be launched and tested.
-
-## Run the local server
+### 5 Run the local server
 
 ```shell
 python manage.py runserver
 ```
-
-During this run will be used the settings from [base.py](/config/django/base.py). You can specify the Django settings
-file by adding an environment variable to your run configuration (not in the file `.env`):
-
-- `DJANGO_SETTINGS_MODULE=config.django.test`
-- `DJANGO_SETTINGS_MODULE=config.django.production`
-- `DJANGO_SETTINGS_MODULE=config.django.base` (default)
