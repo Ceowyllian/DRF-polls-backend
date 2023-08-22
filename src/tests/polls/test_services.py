@@ -4,9 +4,9 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from db.polls.models import Question
 from services.polls import (
     cancel_vote,
-    create_choice_instances,
-    create_question_instance,
+    choices_create,
     perform_vote,
+    question_create,
     question_destroy,
     question_update,
 )
@@ -38,10 +38,11 @@ def question_with_choices(title=None, text=None, choices=None):
     return {**question_dict(title=title, text=text), "choices": choices}
 
 
-class TestCreateQuestionInstance:
+class TestQuestionCreate:
     def test_created_successfully(self, user):
-        question_data = question_dict()
-        question = create_question_instance(created_by=user, **question_data)
+        question_data = question_with_choices()
+        question = question_create(created_by=user, **question_data)
+        del question_data["choices"]
         for field, value in question_data.items():
             assert getattr(question, field) == value
 
@@ -59,18 +60,18 @@ class TestCreateQuestionInstance:
 
     @staticmethod
     def fail(**kwargs):
-        question_data = question_dict()
+        question_data = question_with_choices()
         for key, value in kwargs.items():
             question_data[key] = value
         with pytest.raises(ValidationError):
-            create_question_instance(**question_data)
+            question_create(**question_data)
 
 
 class TestCreateChoiceInstances:
     def test_created_successfully(self, question):
         choices = choice_list()
 
-        instances = create_choice_instances(question=question, choices=choices)
+        instances = choices_create(question=question, new_choices=choices)
 
         assert len(instances) == len(choices)
         for choice_instance in instances:
@@ -95,7 +96,7 @@ class TestCreateChoiceInstances:
     def fail(question, **kwargs):
         choices = choice_list(**kwargs)
         with pytest.raises(ValidationError):
-            create_choice_instances(question=question, choices=choices)
+            choices_create(question=question, new_choices=choices)
 
 
 class TestQuestionDestroy:
