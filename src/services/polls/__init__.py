@@ -1,9 +1,3 @@
-from .question import (
-    QuestionFilter,
-    create_choice_instances,
-    create_question_instance,
-    question_create,
-    question_destroy,
-    question_update,
-)
+from .choice import choice_delete, choice_update, choices_create, choices_replace
+from .question import QuestionFilter, question_create, question_destroy, question_update
 from .vote import cancel_vote, perform_vote

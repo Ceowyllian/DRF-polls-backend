@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Sequence
 
 import django_filters
 from django.contrib.auth import get_user_model
@@ -6,14 +6,13 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
 from db.common.types import UserModelType
-from db.polls.models import Choice, Question, choice_set_validators
+from db.polls.models import Question
 from services.common import model_update
+from services.polls.choice import choices_create
 
 __all__ = [
     "question_create",
     "question_destroy",
-    "create_choice_instances",
-    "create_question_instance",
     "question_update",
     "QuestionFilter",
 ]
@@ -64,47 +63,12 @@ def question_destroy(*, question_pk: int, destroyed_by: UserModelType):
     question.delete()
 
 
-def create_question_instance(
-    *, title: str, text: str, created_by: UserModelType
+def question_create(
+    *, title: str, text: str, created_by: UserModelType, choices: Sequence[str]
 ) -> Question:
     question = Question(title=title, text=text, owner=created_by)
     question.full_clean()
-    return question
-
-
-def validate_choices(choices: Iterable[str]):
-    for validator in choice_set_validators:
-        validator(choices)
-
-
-def create_choice_instances(
-    *, choices: Iterable[str], question: Question
-) -> Iterable[Choice]:
-    for validator in choice_set_validators:
-        validator(choices)
-
-    instances = [Choice(text=text, question=question) for text in choices]
-    for instance in instances:
-        instance.full_clean(validate_unique=False, validate_constraints=False)
-    return instances
-
-
-def question_create(
-    *, title: str, text: str, created_by: UserModelType, choices: Iterable[str]
-) -> Question:
-    question = create_question_instance(title=title, text=text, created_by=created_by)
     with transaction.atomic():
         question.save()
-        choice_instances = create_choice_instances(choices=choices, question=question)
-        Choice.objects.bulk_create(objs=choice_instances)
-    return Question.objects.get(question_pk=question.pk, fetch_choices=True)
-
-
-def add_choices(*, question_pk: Any, choices: Iterable[str]) -> Iterable[Choice]:
-    question = Question.objects.get(pk=question_pk)
-    existing_choices = {choice.text for choice in question.choice_set.all()}
-    validate_choices(existing_choices | set(choices))
-    choice_instances = create_choice_instances(choices=choices, question=question)
-    for choice in choice_instances:
-        choice.save()
-    return choice_instances
+        choices_create(new_choices=choices, question=question)
+    return Question.objects.get(id=question.pk)

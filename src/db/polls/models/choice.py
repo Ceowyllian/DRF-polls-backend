@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -23,26 +22,6 @@ text_validators = (
         limit_value=ChoiceConfig.TEXT_MAX_LEN,
         message="Choice title must be no longer than %s characters long."
         % ChoiceConfig.TEXT_MAX_LEN,
-    ),
-)
-
-
-def unique_choices(choices: list[str]):
-    if len(choices) > len(set(choices)):
-        raise ValidationError("The choices must be different.")
-
-
-choice_set_validators = (
-    unique_choices,
-    MinLengthValidator(
-        limit_value=ChoiceConfig.CHOICES_MIN_NUMBER,
-        message="Too few choices, minimum %s required."
-        % ChoiceConfig.CHOICES_MIN_NUMBER,
-    ),
-    MaxLengthValidator(
-        limit_value=ChoiceConfig.CHOICES_MAX_NUMBER,
-        message="Too many choices, maximum %s allowed."
-        % ChoiceConfig.CHOICES_MAX_NUMBER,
     ),
 )
 

@@ -1,4 +1,4 @@
-from .choice import Choice, ChoiceConfig, choice_set_validators
+from .choice import Choice, ChoiceConfig
 from .choice import text_validators as choice_text_validators
 from .question import Question, QuestionConfig
 from .question import text_validators as question_text_validators
