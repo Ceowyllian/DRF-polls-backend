@@ -3,21 +3,19 @@ from typing import Iterable, Sequence
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from db.polls.models import Choice, ChoiceConfig, Question
+from db.polls.models import CHOICES_MAX_NUMBER, CHOICES_MIN_NUMBER, Choice, Question
 
 
 def validate_choice_set(choices):
     if len(choices) > len(set(choices)):
         raise ValidationError("The choices must be different")
-    if len(choices) < ChoiceConfig.CHOICES_MIN_NUMBER:
+    if len(choices) < CHOICES_MIN_NUMBER:
         raise ValidationError(
-            message="Too few choices, minimum %s required."
-            % ChoiceConfig.CHOICES_MIN_NUMBER
+            message="Too few choices, minimum %s required." % CHOICES_MIN_NUMBER
         )
-    if len(choices) > ChoiceConfig.CHOICES_MAX_NUMBER:
+    if len(choices) > CHOICES_MAX_NUMBER:
         raise ValidationError(
-            message="Too many choices, maximum %s allowed."
-            % ChoiceConfig.CHOICES_MAX_NUMBER,
+            message="Too many choices, maximum %s allowed." % CHOICES_MAX_NUMBER,
         )
 
 
@@ -50,7 +48,7 @@ def choice_update(*, choice: Choice, text: str):
 
 def choice_delete(*, choice: Choice):
     existing_choices_count = choice.question.choice_set.count()
-    if existing_choices_count - 1 < ChoiceConfig.CHOICES_MIN_NUMBER:
+    if existing_choices_count - 1 < CHOICES_MIN_NUMBER:
         raise ValidationError(
             "You cannot delete this answer option, otherwise there will be too "
             "few of them."

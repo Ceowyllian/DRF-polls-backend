@@ -3,32 +3,25 @@ from django.db import models
 from django.db.models import UniqueConstraint
 
 from db.common.models import BaseModel
-
-
-class ChoiceConfig:
-    TEXT_MIN_LEN = 1
-    TEXT_MAX_LEN = 60
-    CHOICES_MIN_NUMBER = 2
-    CHOICES_MAX_NUMBER = 10
-
+from db.polls.models.constants import CHOICE_TEXT_MAX_LEN, CHOICE_TEXT_MIN_LEN
 
 text_validators = (
     MinLengthValidator(
-        limit_value=ChoiceConfig.TEXT_MIN_LEN,
+        limit_value=CHOICE_TEXT_MIN_LEN,
         message="Choice text must be at least %s characters long."
-        % (ChoiceConfig.TEXT_MIN_LEN - 1),
+        % (CHOICE_TEXT_MIN_LEN - 1),
     ),
     MaxLengthValidator(
-        limit_value=ChoiceConfig.TEXT_MAX_LEN,
+        limit_value=CHOICE_TEXT_MAX_LEN,
         message="Choice title must be no longer than %s characters long."
-        % ChoiceConfig.TEXT_MAX_LEN,
+        % CHOICE_TEXT_MAX_LEN,
     ),
 )
 
 
 class Choice(BaseModel):
     text = models.CharField(
-        max_length=ChoiceConfig.TEXT_MAX_LEN,
+        max_length=CHOICE_TEXT_MAX_LEN,
         validators=text_validators,
     )
     question = models.ForeignKey(

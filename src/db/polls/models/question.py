@@ -4,40 +4,39 @@ from django.db import models
 
 from db.common.models import BaseModel, WithOwnerMixin
 from db.common.types import UserModelType
+from db.polls.models.constants import (
+    QUESTION_TEXT_MAX_LEN,
+    QUESTION_TEXT_MIN_LEN,
+    QUESTION_TITLE_MAX_LEN,
+    QUESTION_TITLE_MIN_LEN,
+)
 
 User: UserModelType = get_user_model()
 
 
-class QuestionConfig:
-    TITLE_MIN_LEN = 40
-    TITLE_MAX_LEN = 40
-    TEXT_MIN_LEN = 20
-    TEXT_MAX_LEN = 200
-
-
 title_validators = (
     MinLengthValidator(
-        limit_value=QuestionConfig.TITLE_MIN_LEN,
+        limit_value=QUESTION_TITLE_MIN_LEN,
         message="Question title must be at least %s characters long."
-        % QuestionConfig.TITLE_MIN_LEN,
+        % QUESTION_TITLE_MIN_LEN,
     ),
     MaxLengthValidator(
-        limit_value=QuestionConfig.TITLE_MAX_LEN,
+        limit_value=QUESTION_TITLE_MAX_LEN,
         message="Question title must be no longer than %s characters long."
-        % QuestionConfig.TITLE_MAX_LEN,
+        % QUESTION_TITLE_MAX_LEN,
     ),
 )
 
 text_validators = (
     MinLengthValidator(
-        limit_value=QuestionConfig.TEXT_MIN_LEN,
+        limit_value=QUESTION_TEXT_MIN_LEN,
         message="Question text must be at least %s characters long."
-        % QuestionConfig.TEXT_MIN_LEN,
+        % QUESTION_TEXT_MIN_LEN,
     ),
     MaxLengthValidator(
-        limit_value=QuestionConfig.TEXT_MAX_LEN,
+        limit_value=QUESTION_TEXT_MAX_LEN,
         message="Question text must be no longer than %s characters long."
-        % QuestionConfig.TEXT_MAX_LEN,
+        % QUESTION_TEXT_MAX_LEN,
     ),
 )
 
@@ -47,11 +46,11 @@ class Question(
     BaseModel,
 ):
     title = models.CharField(
-        max_length=QuestionConfig.TITLE_MAX_LEN,
+        max_length=QUESTION_TITLE_MAX_LEN,
         validators=title_validators,
     )
     text = models.CharField(
-        max_length=QuestionConfig.TEXT_MAX_LEN,
+        max_length=QUESTION_TEXT_MAX_LEN,
         validators=text_validators,
     )
 

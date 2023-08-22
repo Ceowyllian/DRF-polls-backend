@@ -3,7 +3,18 @@ from django.utils.crypto import get_random_string
 from rest_framework.test import APIClient
 
 from db.common.types import UserModelType
-from db.polls.models import Choice, ChoiceConfig, Question, QuestionConfig, Vote
+from db.polls.models import (
+    CHOICE_TEXT_MAX_LEN,
+    CHOICES_MAX_NUMBER,
+    CHOICES_MIN_NUMBER,
+    QUESTION_TEXT_MAX_LEN,
+    QUESTION_TEXT_MIN_LEN,
+    QUESTION_TITLE_MAX_LEN,
+    QUESTION_TITLE_MIN_LEN,
+    Choice,
+    Question,
+    Vote,
+)
 
 
 @pytest.fixture()
@@ -71,43 +82,43 @@ class Q:
     class title:
         @staticmethod
         def valid():
-            return get_random_string(QuestionConfig.TITLE_MAX_LEN)
+            return get_random_string(QUESTION_TITLE_MAX_LEN)
 
         @staticmethod
         def too_long():
-            return get_random_string(QuestionConfig.TITLE_MAX_LEN + 1)
+            return get_random_string(QUESTION_TITLE_MAX_LEN + 1)
 
         @staticmethod
         def too_short():
-            return get_random_string(QuestionConfig.TITLE_MIN_LEN - 1)
+            return get_random_string(QUESTION_TITLE_MIN_LEN - 1)
 
     class text:
         @staticmethod
         def valid():
-            return get_random_string(QuestionConfig.TEXT_MAX_LEN)
+            return get_random_string(QUESTION_TEXT_MAX_LEN)
 
         @staticmethod
         def too_long():
-            return get_random_string(QuestionConfig.TEXT_MAX_LEN + 1)
+            return get_random_string(QUESTION_TEXT_MAX_LEN + 1)
 
         @staticmethod
         def too_short():
-            return get_random_string(QuestionConfig.TEXT_MIN_LEN - 1)
+            return get_random_string(QUESTION_TEXT_MIN_LEN - 1)
 
 
 class C:
     class number:
         @staticmethod
         def valid():
-            return ChoiceConfig.CHOICES_MAX_NUMBER
+            return CHOICES_MAX_NUMBER
 
         @staticmethod
         def too_many():
-            return ChoiceConfig.CHOICES_MAX_NUMBER + 1
+            return CHOICES_MAX_NUMBER + 1
 
         @staticmethod
         def too_few():
-            return ChoiceConfig.CHOICES_MIN_NUMBER - 1
+            return CHOICES_MIN_NUMBER - 1
 
     class text:
         @staticmethod
@@ -115,9 +126,7 @@ class C:
             i = 0
             while True:
                 i += 1
-                yield get_random_string(ChoiceConfig.TEXT_MAX_LEN - len(str(i))) + str(
-                    i
-                )
+                yield get_random_string(CHOICE_TEXT_MAX_LEN - len(str(i))) + str(i)
 
         @staticmethod
         def empty():
@@ -129,10 +138,10 @@ class C:
             i = 0
             while True:
                 i += 1
-                yield get_random_string(ChoiceConfig.TEXT_MAX_LEN) + str(i)
+                yield get_random_string(CHOICE_TEXT_MAX_LEN) + str(i)
 
         @staticmethod
         def identical():
-            text = get_random_string(ChoiceConfig.TEXT_MAX_LEN)
+            text = get_random_string(CHOICE_TEXT_MAX_LEN)
             while True:
                 yield text
