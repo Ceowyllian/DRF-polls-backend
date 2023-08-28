@@ -6,12 +6,15 @@ from db.common.types import UserModelType
 from db.polls.models import Question
 
 __all__ = [
+    "ChoicesCreateSerializer",
     "QuestionFilterSerializer",
     "QuestionCreateSerializer",
     "QuestionUpdateSerializer",
     "QuestionDetailSerializer",
     "QuestionListSerializer",
     "VoteCreateSerializer",
+    "ChoiceDetailSerializer",
+    "ChoiceUpdateSerializer",
 ]
 
 User: UserModelType = get_user_model()
@@ -42,6 +45,11 @@ class VoteCreateSerializer(serializers.Serializer):
     choice_pk = serializers.IntegerField(min_value=1, required=True)
 
 
+class ChoiceDetailSerializer(serializers.Serializer):
+    pk = serializers.UUIDField()
+    text = serializers.CharField()
+
+
 class QuestionDetailSerializer(HyperlinkedModelSerializer):
     class Meta:
         model = Question
@@ -51,11 +59,7 @@ class QuestionDetailSerializer(HyperlinkedModelSerializer):
             "owner": {"view_name": "user-detail", "lookup_field": "username"},
         }
 
-    class ChoiceSerializer(serializers.Serializer):
-        pk = serializers.UUIDField()
-        text = serializers.CharField()
-
-    choices = ChoiceSerializer(many=True, source="choice_set")
+    choices = ChoiceDetailSerializer(many=True, source="choice_set")
 
 
 class QuestionListSerializer(HyperlinkedModelSerializer):
@@ -66,3 +70,24 @@ class QuestionListSerializer(HyperlinkedModelSerializer):
             "url": {"view_name": "question-detail", "lookup_field": "pk"},
             "owner": {"view_name": "user-detail", "lookup_field": "username"},
         }
+
+
+class ChoicesCreateSerializer(serializers.Serializer):
+    choices = serializers.ListSerializer(
+        required=True,
+        allow_null=False,
+        allow_empty=False,
+        child=serializers.CharField(
+            required=True,
+            allow_null=False,
+            allow_blank=False,
+        ),
+    )
+
+
+class ChoiceUpdateSerializer(serializers.Serializer):
+    text = serializers.CharField(
+        required=True,
+        allow_null=False,
+        allow_blank=False,
+    )
