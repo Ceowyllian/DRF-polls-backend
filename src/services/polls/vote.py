@@ -1,4 +1,7 @@
+from uuid import UUID
+
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 
 from db.common.types import UserModelType
 from db.polls.models import Choice, Vote
@@ -6,6 +9,7 @@ from db.polls.models import Choice, Vote
 __all__ = [
     "perform_vote",
     "cancel_vote",
+    "votes_per_question",
 ]
 
 
@@ -23,3 +27,7 @@ def cancel_vote(*, choice_pk: int, user: UserModelType):
     number_deleted, _ = Vote.objects.filter(choice=choice, owner=user).delete()
     if number_deleted == 0:
         raise ValidationError("You didn't vote for this choice.")
+
+
+def votes_per_question(*, question) -> dict[UUID, int]:
+    return Choice.objects.filter(question=question).annotate(Count("vote")).values("id")
