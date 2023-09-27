@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.http import Http404
 
 from api.polls import views
 from core import pagination
@@ -85,24 +86,24 @@ class TestQuestionRetrieve:
     HTTP authorization is NOT required.
     """
 
-    uri = "/api/polls/questions/123/"
+    uri = "/api/polls/questions/%s/"
 
     def test_200_question_exists(self, monkeypatch, api_client, question):
         def retrieve_mock(*args, **kwargs):
             return question
 
         monkeypatch.setattr(views.QuestionViewSet, "get_object", retrieve_mock)
-        response = api_client.get(self.uri)
+        response = api_client.get(self.uri % question.pk)
 
         assert response.status_code == 200
 
     def test_404_non_existent_question(self, monkeypatch, api_client):
-        def retrieve_mock(*args, **kwargs):
-            raise Question.DoesNotExist
+        def get_object(*args, **kwargs):
+            raise Http404
 
-        monkeypatch.setattr(views.QuestionViewSet, "get_object", retrieve_mock)
+        monkeypatch.setattr(views.QuestionViewSet, "get_object", get_object)
 
-        response = api_client.get(self.uri)
+        response = api_client.get(self.uri % uuid.uuid4())
 
         assert response.status_code == 404
 
@@ -114,7 +115,7 @@ class TestQuestionUpdate:
     HTTP authorization IS required.
     """
 
-    uri = "/api/polls/questions/123/"
+    uri = "/api/polls/questions/%s/"
 
     @pytest.fixture(scope="class")
     def updated_fields(self):
@@ -133,39 +134,41 @@ class TestQuestionUpdate:
 
         monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
-        response = api_client.patch(self.uri, data=updated_fields)
+        response = api_client.patch(self.uri % question.pk, data=updated_fields)
 
         assert response.status_code == 200
 
-    def test_400_invalid_question_fields(self, monkeypatch, api_client, user):
+    def test_400_invalid_question_fields(self, monkeypatch, api_client, user, question):
         def update_mock(*args, **kwargs):
             raise ValidationError("")
 
         monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
-        response = api_client.patch(self.uri, data={"title": "", "text": None})
+        response = api_client.patch(
+            self.uri % question.pk, data={"title": "", "text": None}
+        )
 
         assert response.status_code == 400
 
     def test_401_cannot_update_unauthorized(
-        self, monkeypatch, api_client, updated_fields
+        self, monkeypatch, api_client, updated_fields, question
     ):
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
         monkeypatch.setattr(views, "question_update", should_not_be_called)
-        response = api_client.patch(self.uri, data=updated_fields)
+        response = api_client.patch(self.uri % question.pk, data=updated_fields)
         assert response.status_code == 401
 
     def test_403_cannot_update_someone_elses_question(
-        self, monkeypatch, api_client, user, updated_fields
+        self, monkeypatch, api_client, user, updated_fields, question
     ):
         def update_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
 
         monkeypatch.setattr(views, "question_update", update_mock)
         api_client.force_authenticate(user)
-        response = api_client.patch(self.uri, data=updated_fields)
+        response = api_client.patch(self.uri % question.pk, data=updated_fields)
 
         assert response.status_code == 403
 
@@ -177,30 +180,30 @@ class TestQuestionDelete:
     HTTP authorization IS required.
     """
 
-    uri = "/api/polls/questions/123/"
+    uri = "/api/polls/questions/%s/"
 
-    def test_204_deleted_successfully(self, monkeypatch, api_client, user):
+    def test_204_deleted_successfully(self, monkeypatch, api_client, user, question):
         def destroy_mock(*args, **kwargs):
             pass
 
         monkeypatch.setattr(views, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
-        response = api_client.delete(self.uri)
+        response = api_client.delete(self.uri % question.pk)
 
         assert response.status_code == 204
 
-    def test_401_cannot_delete_unauthorized(self, monkeypatch, api_client):
+    def test_401_cannot_delete_unauthorized(self, monkeypatch, api_client, question):
         def should_not_be_called(*args, **kwargs):
             raise AssertionError("Question update service shouldn't be called!")
 
         monkeypatch.setattr(views, "question_destroy", should_not_be_called)
 
-        response = api_client.delete(self.uri)
+        response = api_client.delete(self.uri % question.pk)
         assert response.status_code == 401
 
     def test_403_cannot_delete_someone_elses_question(
-        self, monkeypatch, api_client, user
+        self, monkeypatch, api_client, user, question
     ):
         def destroy_mock(*args, **kwargs):
             raise PermissionDenied("Nope, lol")
@@ -208,7 +211,7 @@ class TestQuestionDelete:
         monkeypatch.setattr(views, "question_destroy", destroy_mock)
 
         api_client.force_authenticate(user)
-        response = api_client.delete(self.uri)
+        response = api_client.delete(self.uri % question.pk)
         assert response.status_code == 403
 
     def test_404_cannot_delete_non_existent_question(

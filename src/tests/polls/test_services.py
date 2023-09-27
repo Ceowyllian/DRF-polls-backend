@@ -101,25 +101,20 @@ class TestCreateChoiceInstances:
 
 class TestQuestionDestroy:
     def test_destroyed_successfully(self, question, user):
-        question_destroy(question_pk=question.pk, destroyed_by=user)
+        question_destroy(question=question, destroyed_by=user)
         with pytest.raises(Question.DoesNotExist):
             Question.objects.get(id=question.pk)
 
-    def test_fail_question_does_not_exist(self, question, user):
-        question.delete()
-        with pytest.raises(Question.DoesNotExist):
-            question_destroy(question_pk=question.pk, destroyed_by=user)
-
     def test_fail_cannot_destroy_someone_elses_question(self, question, another_user):
         with pytest.raises(PermissionDenied):
-            question_destroy(question_pk=question.pk, destroyed_by=another_user)
+            question_destroy(question=question, destroyed_by=another_user)
 
 
 class TestQuestionUpdate:
     def test_update_successfully(self, user, question):
         updated_fields = question_dict()
 
-        question_update(question_pk=question.pk, updated_by=user, data=updated_fields)
+        question_update(question=question, updated_by=user, data=updated_fields)
         question.refresh_from_db()
 
         for field, value in updated_fields.items():
@@ -129,7 +124,7 @@ class TestQuestionUpdate:
         updated_fields = question_dict()
         with pytest.raises(PermissionDenied):
             question_update(
-                question_pk=question.pk, updated_by=another_user, data=updated_fields
+                question=question, updated_by=another_user, data=updated_fields
             )
 
     def test_fail_to_update_invalid_values(self, user, question):
@@ -138,9 +133,7 @@ class TestQuestionUpdate:
         )
 
         with pytest.raises(ValidationError):
-            question_update(
-                question_pk=question.pk, updated_by=user, data=updated_fields
-            )
+            question_update(question=question, updated_by=user, data=updated_fields)
 
 
 class TestPerformVote:
