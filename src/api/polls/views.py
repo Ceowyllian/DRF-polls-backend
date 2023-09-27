@@ -160,11 +160,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         output = QuestionStatisticsSerializer(statistics, many=True)
         return Response(output.data, status.HTTP_200_OK)
 
-    def handle_exception(self, exc):
-        if isinstance(exc, Question.DoesNotExist):
-            raise Http404 from exc
-        return super().handle_exception(exc)
-
 
 @extend_schema(tags=[SCHEMA_TAG_POLLS])
 @extend_schema_view(
