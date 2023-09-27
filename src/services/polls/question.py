@@ -44,9 +44,8 @@ class QuestionFilter(django_filters.FilterSet):
 
 
 def question_update(
-    *, question_pk: int, updated_by: UserModelType, data: Dict[str, Any]
+    *, question: Question, updated_by: UserModelType, data: Dict[str, Any]
 ) -> Question:
-    question = Question.objects.get(pk=question_pk)
     if updated_by != question.owner:
         raise PermissionDenied("You can't edit this question.")
 
@@ -56,8 +55,7 @@ def question_update(
     return question
 
 
-def question_destroy(*, question_pk: int, destroyed_by: UserModelType):
-    question = Question.objects.get(pk=question_pk)
+def question_destroy(*, question: Question, destroyed_by: UserModelType):
     if destroyed_by != question.owner:
         raise PermissionDenied("You can't delete this question.")
     question.delete()

@@ -114,7 +114,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         input_ = QuestionUpdateSerializer(data=request.data, partial=partial)
         input_.is_valid(raise_exception=True)
         question = question_update(
-            question_pk=kwargs["pk"],
+            question=self.get_object(),
             updated_by=request.user,
             data=input_.validated_data,
         )
@@ -124,7 +124,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return Response(output.data, status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        question_destroy(question_pk=kwargs["pk"], destroyed_by=request.user)
+        question_destroy(question=self.get_object(), destroyed_by=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
