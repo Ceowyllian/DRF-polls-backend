@@ -12,6 +12,7 @@ __all__ = [
     "QuestionUpdateSerializer",
     "QuestionDetailSerializer",
     "QuestionListSerializer",
+    "QuestionStatisticsSerializer",
     "VoteCreateSerializer",
     "ChoiceDetailSerializer",
     "ChoiceUpdateSerializer",
@@ -48,6 +49,11 @@ class VoteCreateSerializer(serializers.Serializer):
 class ChoiceDetailSerializer(serializers.Serializer):
     pk = serializers.UUIDField()
     text = serializers.CharField()
+
+
+class QuestionStatisticsSerializer(serializers.Serializer):
+    pk = serializers.UUIDField()
+    votes = serializers.IntegerField(source="vote__count")
 
 
 class QuestionDetailSerializer(HyperlinkedModelSerializer):

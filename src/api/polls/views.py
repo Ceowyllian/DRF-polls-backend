@@ -16,6 +16,7 @@ from api.polls.serializers import (
     QuestionCreateSerializer,
     QuestionDetailSerializer,
     QuestionListSerializer,
+    QuestionStatisticsSerializer,
     QuestionUpdateSerializer,
 )
 from db.polls.models import Choice, Question
@@ -30,6 +31,7 @@ from services.polls import (
     question_create,
     question_destroy,
     question_update,
+    votes_per_question,
 )
 
 __all__ = [
@@ -129,8 +131,13 @@ class QuestionViewSet(viewsets.ModelViewSet):
         summary="Replace question choices",
         request=ChoicesCreateSerializer,
         responses={201: ChoiceDetailSerializer(many=True)},
+        operation_id="api_polls_questions_choices_replace",
     )
-    @action(methods=["PUT"], detail=True)
+    @action(
+        methods=["PUT"],
+        detail=True,
+        pagination_class=None,
+    )
     def choices(self, request, *args, **kwargs):
         question = self.get_object()
         input_ = ChoicesCreateSerializer(data=request.data)
@@ -138,6 +145,20 @@ class QuestionViewSet(viewsets.ModelViewSet):
         choices = choices_replace(question=question, **input_.validated_data)
         output = ChoiceDetailSerializer(choices, many=True)
         return Response(output.data, status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Calculate votes per choice for the specified question",
+        responses={200: QuestionStatisticsSerializer(many=True)},
+    )
+    @action(
+        methods=["GET"],
+        detail=True,
+        pagination_class=None,
+    )
+    def statistics(self, request, *args, **kwargs):
+        statistics = votes_per_question(question=self.get_object())
+        output = QuestionStatisticsSerializer(statistics, many=True)
+        return Response(output.data, status.HTTP_200_OK)
 
     def handle_exception(self, exc):
         if isinstance(exc, Question.DoesNotExist):
@@ -183,6 +204,8 @@ class ChoiceViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
 ):
+    pagination_class = None
+
     def get_queryset(self):
         return Choice.objects.filter(question_id=self.kwargs["question_pk"])
 
