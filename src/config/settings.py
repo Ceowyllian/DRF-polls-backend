@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from split_settings.tools import include
 
 base_settings = [
+    "components/app.py",
     "components/base.py",
     "components/cors.py",
     "components/db.py",
@@ -20,6 +21,7 @@ base_settings = [
     "components/djoser.py",
     "components/installed_apps.py",
     "components/middleware.py",
+    "components/oas3.py",
     "components/rest.py",
     "components/static.py",
     "components/templates.py",
