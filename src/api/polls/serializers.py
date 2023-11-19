@@ -52,7 +52,7 @@ class ChoiceDetailSerializer(serializers.Serializer):
 
 
 class QuestionStatisticsSerializer(serializers.Serializer):
-    pk = serializers.UUIDField()
+    choice_pk = serializers.UUIDField(source="pk")
     votes = serializers.IntegerField(source="vote__count")
 
 
