@@ -10,91 +10,70 @@ from services.polls import (
     question_destroy,
     question_update,
 )
-
-from .conftest import C, Q
+from tests.polls.factories import (
+    QuestionChoicesDictFactory,
+    QuestionDictFactory,
+    WrongChoice,
+    WrongQuestion,
+)
 
 
 def get_default(value, default):
     return default if value is None else value
 
 
-def choice_list(number=None, text=None):
-    number = get_default(number, C.number.valid())
-    text = get_default(text, C.text.valid())
-    return [next(text) for _ in range(number)]
-
-
-def question_dict(title=None, text=None):
-    title = get_default(title, Q.title.valid())
-    text = get_default(text, Q.text.valid())
-    return {
-        "title": title,
-        "text": text,
-    }
-
-
-def question_with_choices(title=None, text=None, choices=None):
-    choices = get_default(choices, choice_list())
-    return {**question_dict(title=title, text=text), "choices": choices}
-
-
 class TestQuestionCreate:
-    def test_created_successfully(self, user):
-        question_data = question_with_choices()
-        question = question_create(created_by=user, **question_data)
-        del question_data["choices"]
-        for field, value in question_data.items():
+    def test_created_successfully(self, user, question_with_choices_dict):
+        question = question_create(**question_with_choices_dict, created_by=user)
+        choices = question_with_choices_dict.pop("choices")
+        for field, value in question_with_choices_dict.items():
             assert getattr(question, field) == value
+        for choice in question.choice_set.all():
+            assert choice.text in choices
 
     def test_fail_too_short_title(self, user):
-        self.fail(title=Q.title.too_short(), created_by=user)
+        self.fail(user, title=WrongQuestion.title_too_short)
 
     def test_fail_too_long_title(self, user):
-        self.fail(title=Q.title.too_long(), created_by=user)
+        self.fail(user, title=WrongQuestion.title_too_long)
 
     def test_fail_too_short_text(self, user):
-        self.fail(title=Q.text.too_short(), created_by=user)
+        self.fail(user, title=WrongQuestion.text_too_short)
 
     def test_fail_too_long_text(self, user):
-        self.fail(title=Q.text.too_long(), created_by=user)
+        self.fail(user, title=WrongQuestion.text_too_long)
 
     @staticmethod
-    def fail(**kwargs):
-        question_data = question_with_choices()
-        for key, value in kwargs.items():
-            question_data[key] = value
+    def fail(user, **kwargs):
         with pytest.raises(ValidationError):
-            question_create(**question_data)
+            question_create(**QuestionChoicesDictFactory(**kwargs), created_by=user)
 
 
 class TestCreateChoiceInstances:
-    def test_created_successfully(self, question):
-        choices = choice_list()
-
-        instances = choices_create(question=question, new_choices=choices)
-
-        assert len(instances) == len(choices)
+    def test_created_successfully(self, question, choice_list):
+        instances = choices_create(question=question, new_choices=choice_list)
+        assert len(instances) == len(choice_list)
         for choice_instance in instances:
-            assert choice_instance.text in choices
+            assert choice_instance.text in choice_list
 
     def test_fail_too_many_choices(self, question):
-        self.fail(question, number=C.number.too_many())
+        self.fail(question, WrongChoice.list_too_long)
 
     def test_fail_too_few_choices(self, question):
-        self.fail(question, number=C.number.too_few())
+        self.fail(question, WrongChoice.list_too_short)
 
     def test_fail_empty_text_choices(self, question):
-        self.fail(question, text=C.text.empty())
+        self.fail(question, WrongChoice.list_with_empty_choices)
 
-    def test_fail_too_long_text_choices(self, question):
-        self.fail(question, text=C.text.too_long())
+    def test_fail_too_long_text_choices(self, question, choice_list):
+        choice_list[0] = WrongChoice.too_long_text
+        self.fail(question, choice_list)
 
     def test_fail_identical_choices(self, question):
-        self.fail(question, text=C.text.identical())
+        self.fail(question, WrongChoice.identical_choices)
 
     @staticmethod
-    def fail(question, **kwargs):
-        choices = choice_list(**kwargs)
+    def fail(question, choices):
         with pytest.raises(ValidationError):
             choices_create(question=question, new_choices=choices)
 
@@ -111,29 +90,28 @@ class TestQuestionDestroy:
 
 
 class TestQuestionUpdate:
-    def test_update_successfully(self, user, question):
-        updated_fields = question_dict()
-
-        question_update(question=question, updated_by=user, data=updated_fields)
+    def test_update_successfully(self, user, question, question_dict):
+        question_update(question=question, updated_by=user, data=question_dict)
         question.refresh_from_db()
 
-        for field, value in updated_fields.items():
+        for field, value in question_dict.items():
             assert getattr(question, field) == value
 
-    def test_fail_to_update_someone_elses_question(self, question, another_user):
-        updated_fields = question_dict()
+    def test_fail_to_update_someone_elses_question(
+        self, question, another_user, question_dict
+    ):
         with pytest.raises(PermissionDenied):
             question_update(
-                question=question, updated_by=another_user, data=updated_fields
+                question=question, updated_by=another_user, data=question_dict
             )
 
     def test_fail_to_update_invalid_values(self, user, question):
-        updated_fields = question_dict(
-            title=Q.title.too_long(), text=Q.title.too_short()
-        )
-
         with pytest.raises(ValidationError):
-            question_update(question=question, updated_by=user, data=updated_fields)
+            question_update(
+                question=question,
+                updated_by=user,
+                data=QuestionDictFactory(text=WrongQuestion.text_too_long),
+            )
 
 
 class TestPerformVote:

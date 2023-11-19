@@ -44,19 +44,19 @@ class TestQuestionCreate:
     uri = "/api/polls/questions/"
 
     def test_201_created_successfully(
-        self, monkeypatch, api_client, user, valid_question_dict
+        self, monkeypatch, api_client, user, question_with_choices_dict
     ):
         def create_mock(**kwargs):
-            question = Question(title="blablabla", text="blablabla", owner=user)
             import uuid
 
+            question = Question(title="blablabla", text="blablabla", owner=user)
             question.pk = uuid.uuid4()
             return question
 
         monkeypatch.setattr(views, "question_create", create_mock)
 
         api_client.force_authenticate(user)
-        response = api_client.post(self.uri, data=valid_question_dict)
+        response = api_client.post(self.uri, data=question_with_choices_dict)
 
         assert response.status_code == 201
 
@@ -73,8 +73,10 @@ class TestQuestionCreate:
 
         assert response.status_code == 400
 
-    def test_401_cannot_create_unauthorized(self, api_client, valid_question_dict):
-        response = api_client.post(self.uri, data=valid_question_dict)
+    def test_401_cannot_create_unauthorized(
+        self, api_client, question_with_choices_dict
+    ):
+        response = api_client.post(self.uri, data=question_with_choices_dict)
 
         assert response.status_code == 401
 
