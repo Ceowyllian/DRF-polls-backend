@@ -12,7 +12,10 @@ class Vote(
     BaseModel,
     WithOwnerMixin,
 ):
-    date_voted = models.DateTimeField(auto_now=True, editable=False)
+    date_voted = models.DateTimeField(
+        auto_now=True,
+        editable=False,
+    )
     question = models.ForeignKey(
         "polls.Question",
         on_delete=models.CASCADE,
