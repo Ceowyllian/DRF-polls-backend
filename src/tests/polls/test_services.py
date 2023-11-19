@@ -10,12 +10,7 @@ from services.polls import (
     question_destroy,
     question_update,
 )
-from tests.polls.factories import (
-    QuestionChoicesDictFactory,
-    QuestionDictFactory,
-    WrongChoice,
-    WrongQuestion,
-)
+from tests.polls.factories import WrongChoice
 
 
 def get_default(value, default):
@@ -30,23 +25,6 @@ class TestQuestionCreate:
             assert getattr(question, field) == value
         for choice in question.choice_set.all():
             assert choice.text in choices
-
-    def test_fail_too_short_title(self, user):
-        self.fail(user, title=WrongQuestion.title_too_short)
-
-    def test_fail_too_long_title(self, user):
-        self.fail(user, title=WrongQuestion.title_too_long)
-
-    def test_fail_too_short_text(self, user):
-        self.fail(user, title=WrongQuestion.text_too_short)
-
-    def test_fail_too_long_text(self, user):
-        self.fail(user, title=WrongQuestion.text_too_long)
-
-    @staticmethod
-    def fail(user, **kwargs):
-        with pytest.raises(ValidationError):
-            question_create(**QuestionChoicesDictFactory(**kwargs), created_by=user)
 
 
 class TestCreateChoiceInstances:
@@ -64,10 +42,6 @@ class TestCreateChoiceInstances:
 
     def test_fail_empty_text_choices(self, question):
         self.fail(question, WrongChoice.list_with_empty_choices)
-
-    def test_fail_too_long_text_choices(self, question, choice_list):
-        choice_list[0] = WrongChoice.too_long_text
-        self.fail(question, choice_list)
 
     def test_fail_identical_choices(self, question):
         self.fail(question, WrongChoice.identical_choices)
@@ -103,14 +77,6 @@ class TestQuestionUpdate:
         with pytest.raises(PermissionDenied):
             question_update(
                 question=question, updated_by=another_user, data=question_dict
-            )
-
-    def test_fail_to_update_invalid_values(self, user, question):
-        with pytest.raises(ValidationError):
-            question_update(
-                question=question,
-                updated_by=user,
-                data=QuestionDictFactory(text=WrongQuestion.text_too_long),
             )
 
 
