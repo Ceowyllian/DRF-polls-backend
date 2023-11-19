@@ -5,7 +5,7 @@ from rest_framework import mixins, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from api.common.schema_tags import SCHEMA_TAG_POLLS
@@ -137,6 +137,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         methods=["PUT"],
         detail=True,
         pagination_class=None,
+        permission_classes=[IsAuthenticated],
     )
     def choices(self, request, *args, **kwargs):
         question = self.get_object()
@@ -200,6 +201,7 @@ class ChoiceViewSet(
     mixins.RetrieveModelMixin,
 ):
     pagination_class = None
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         return Choice.objects.filter(question_id=self.kwargs["question_pk"])
@@ -231,7 +233,7 @@ class ChoiceViewSet(
 
 @extend_schema(tags=[SCHEMA_TAG_POLLS])
 class VoteCreateDeleteAPI(views.APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(summary="Perform vote", responses={201: None})
     def post(self, request, *args, **kwargs):
