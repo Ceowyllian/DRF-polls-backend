@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from api.common.serializers import HyperlinkedModelSerializer
 from db.common.types import UserModelType
-from db.polls.models import Question
 
 __all__ = [
     "ChoicesCreateSerializer",
@@ -56,26 +54,30 @@ class QuestionStatisticsSerializer(serializers.Serializer):
     votes = serializers.IntegerField(source="vote__count")
 
 
-class QuestionDetailSerializer(HyperlinkedModelSerializer):
-    class Meta:
-        model = Question
-        fields = ("url", "pk", "title", "text", "owner", "choices")
-        extra_kwargs = {
-            "url": {"view_name": "question-detail", "lookup_field": "pk"},
-            "owner": {"view_name": "user-detail", "lookup_field": "username"},
-        }
-
-    choices = ChoiceDetailSerializer(many=True, source="choice_set")
+class UserSerializer(serializers.Serializer):
+    pk = serializers.UUIDField()
+    username = serializers.CharField()
 
 
-class QuestionListSerializer(HyperlinkedModelSerializer):
-    class Meta:
-        model = Question
-        fields = ("url", "pk", "title", "owner")
-        extra_kwargs = {
-            "url": {"view_name": "question-detail", "lookup_field": "pk"},
-            "owner": {"view_name": "user-detail", "lookup_field": "username"},
-        }
+class QuestionDetailSerializer(serializers.Serializer):
+    pk = serializers.UUIDField()
+    title = serializers.CharField()
+    text = serializers.CharField()
+    owner = UserSerializer()
+    created = serializers.DateTimeField()
+    modified = serializers.DateTimeField()
+    choices = ChoiceDetailSerializer(
+        many=True,
+        source="choice_set",
+    )
+
+
+class QuestionListSerializer(serializers.Serializer):
+    pk = serializers.UUIDField()
+    title = serializers.CharField()
+    owner = UserSerializer()
+    created = serializers.DateTimeField()
+    modified = serializers.DateTimeField()
 
 
 class ChoicesCreateSerializer(serializers.Serializer):
