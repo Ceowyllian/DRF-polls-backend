@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -7,8 +7,6 @@ from drf_spectacular.views import (
 )
 
 urlpatterns = [
-    re_path(r"^auth/", include("djoser.urls")),
-    re_path(r"^auth/", include("djoser.urls.authtoken")),
     path(r"api/", include("api.urls")),
     path(r"admin/", admin.site.urls),
     path(r"oas3/schema/", SpectacularAPIView.as_view(), name="schema"),
